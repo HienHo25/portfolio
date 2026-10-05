@@ -1,0 +1,1868 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>BD & REC Executive Dashboard 2026</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f4f6f9;--card:#fff;--surface:#f8f9fb;--surface2:#f0f2f6;
+  --border:#e2e6ee;--border2:#c8cfdd;
+  --accent:#2563eb;--accent2:#059669;--amber:#d97706;--red:#dc2626;--purple:#7c3aed;--teal:#0891b2;
+  --text:#1e2535;--text2:#4b5678;--text3:#8a93a8;
+  --r:10px;--rs:6px;
+  --sh:0 1px 4px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.04);
+  --sh2:0 2px 8px rgba(0,0,0,.08),0 8px 24px rgba(0,0,0,.06);
+}
+* {box-sizing:border-box;margin:0;padding:0;}
+body {font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:13px;min-height:100vh;}
+::-webkit-scrollbar {width:5px;height:5px;}
+::-webkit-scrollbar-track {background:var(--surface);}
+::-webkit-scrollbar-thumb {background:var(--border2);border-radius:9px;}
+
+/* HEADER */
+.hdr {background:#fff;border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:54px;position:sticky;top:0;z-index:100;box-shadow:0 1px 4px rgba(0,0,0,.05);}
+.logo {display:flex;align-items:center;gap:10px;}
+.logo-icon {width:30px;height:30px;background:linear-gradient(135deg,var(--accent),var(--purple));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;font-weight:700;}
+.logo-text {font-size:15px;font-weight:700;}
+.logo-text span {color:var(--accent);}
+.vd {width:1px;height:20px;background:var(--border);margin:0 12px;}
+.hdr-sub {font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;}
+.hdr-r {display:flex;align-items:center;gap:8px;}
+.upload-btn {display:flex;align-items:center;gap:6px;background:var(--accent);color:#fff;border:none;padding:7px 16px;border-radius:var(--rs);font-size:12px;font-weight:600;cursor:pointer;transition:background .15s;font-family:'DM Sans',sans-serif;}
+.upload-btn:hover {background:#1d4ed8;}
+.search-g {display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);padding:5px 10px;}
+.search-g input {border:none;background:transparent;outline:none;font-size:12px;color:var(--text);width:180px;font-family:'DM Sans',sans-serif;}
+.search-g input::placeholder {color:var(--text3);}
+
+/* MODULE SWITCHER */
+.mod-switcher {display:flex;background:var(--surface2);border-radius:var(--rs);padding:3px;gap:3px;}
+.mod-btn {padding:5px 14px;font-size:12px;font-weight:600;border:none;border-radius:4px;cursor:pointer;background:transparent;color:var(--text2);transition:all .15s;font-family:'DM Sans',sans-serif;}
+.mod-btn.active {background:#fff;color:var(--accent);box-shadow:0 1px 3px rgba(0,0,0,.1);}
+
+/* TABS */
+.tabs {background:#fff;border-bottom:1px solid var(--border);padding:0 24px;display:flex;}
+.tab {padding:11px 18px;font-size:12px;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;display:flex;align-items:center;gap:6px;}
+.tab:hover {color:var(--text2);}
+.tab.active {color:var(--accent);border-bottom-color:var(--accent);font-weight:600;}
+
+/* MAIN */
+.main {padding:18px 24px;max-width:1600px;margin:0 auto;}
+.tab-content, .rec-tab-content {display:none;}
+.tab-content.active, .rec-tab-content.active {display:block;}
+
+/* FILTER BAR */
+.fbar {background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:12px 16px;margin-bottom:16px;display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;box-shadow:var(--sh);}
+.fg {display:flex;flex-direction:column;gap:3px;}
+.fg label {font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;}
+.fg select, .fg input {background:#fff;border:1px solid var(--border);border-radius:var(--rs);padding:5px 10px;color:var(--text);font-size:12px;font-family:'DM Sans',sans-serif;height:30px;outline:none;min-width:130px;}
+.fg select:focus, .fg input:focus {border-color:var(--accent);box-shadow:0 0 0 2px rgba(37,99,235,.1);}
+.fg input::placeholder {color:var(--text3);}
+.btn-reset {background:#fff;border:1px solid var(--border);color:var(--text2);padding:5px 12px;border-radius:var(--rs);font-size:11px;cursor:pointer;height:30px;font-family:'DM Sans',sans-serif;transition:all .15s;align-self:flex-end;}
+.btn-reset:hover {border-color:var(--red);color:var(--red);}
+.fl-count {font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;align-self:flex-end;margin-left:auto;}
+
+/* KPI GRID */
+.kpi-grid {display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:16px;}
+.kpi {background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:16px;position:relative;overflow:hidden;transition:all .2s;box-shadow:var(--sh);}
+.kpi:hover {box-shadow:var(--sh2);transform:translateY(-2px);}
+.kpi::after {content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--r) var(--r) 0 0;}
+.kpi.blue::after {background:linear-gradient(90deg,var(--accent),#60a5fa);}
+.kpi.green::after {background:linear-gradient(90deg,var(--accent2),#34d399);}
+.kpi.amber::after {background:linear-gradient(90deg,var(--amber),#fbbf24);}
+.kpi.red::after {background:linear-gradient(90deg,var(--red),#f87171);}
+.kpi.purple::after {background:linear-gradient(90deg,var(--purple),#a78bfa);}
+.kpi.teal::after {background:linear-gradient(90deg,var(--teal),#22d3ee);}
+.kpi-lbl {font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
+.kpi-val {font-size:30px;font-weight:700;line-height:1;letter-spacing:-1px;}
+.kpi.blue .kpi-val {color:var(--accent);}
+.kpi.green .kpi-val {color:var(--accent2);}
+.kpi.amber .kpi-val {color:var(--amber);}
+.kpi.red .kpi-val {color:var(--red);}
+.kpi.purple .kpi-val {color:var(--purple);}
+.kpi.teal .kpi-val {color:var(--teal);}
+.kpi-sub {font-size:10px;color:var(--text3);margin-top:4px;}
+.kpi-pills {display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;}
+.kpill {font-size:10px;font-weight:600;padding:2px 8px;border-radius:99px;}
+.kpill.r30 {background:#fee2e2;color:var(--red);}
+.kpill.r60 {background:#fef3c7;color:var(--amber);}
+.kpill.r90 {background:#dbeafe;color:var(--accent);}
+
+/* SECTION CARD */
+.sc {background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:14px;box-shadow:var(--sh);}
+.sc-title {font-size:13px;font-weight:600;color:var(--text);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+.sc-tl {display:flex;align-items:center;gap:8px;}
+
+/* BADGE */
+.badge {display:inline-flex;align-items:center;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;}
+.b-blue {background:#dbeafe;color:var(--accent);}
+.b-green {background:#d1fae5;color:var(--accent2);}
+.b-amber {background:#fef3c7;color:var(--amber);}
+.b-red {background:#fee2e2;color:var(--red);}
+.b-purple {background:#ede9fe;color:var(--purple);}
+.b-teal {background:#cffafe;color:var(--teal);}
+.b-gray {background:#f1f5f9;color:var(--text2);}
+
+/* BAR CHART */
+.bar-item {margin-bottom:8px;}
+.bar-row {display:flex;justify-content:space-between;margin-bottom:3px;font-size:11px;}
+.bar-lbl {color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:70%;}
+.bar-val {color:var(--text);font-weight:600;font-family:'DM Mono',monospace;}
+.bar-track {background:var(--surface2);border-radius:99px;height:6px;}
+.bar-fill {height:100%;border-radius:99px;transition:width .5s cubic-bezier(.4,0,.2,1);}
+
+/* EXPIRY CARDS */
+.expiry-grid {display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px;}
+.exp-card {background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:16px;text-align:center;cursor:pointer;transition:all .2s;box-shadow:var(--sh);}
+.exp-card:hover {transform:translateY(-2px);box-shadow:var(--sh2);}
+.exp-num {font-size:36px;font-weight:700;letter-spacing:-2px;line-height:1;}
+.exp-lbl {font-size:11px;color:var(--text2);margin-top:4px;}
+.exp-hint {font-size:10px;color:var(--text3);margin-top:3px;}
+.exp-card.d30 .exp-num {color:var(--red);}
+.exp-card.d60 .exp-num {color:var(--amber);}
+.exp-card.d90 .exp-num {color:var(--accent);}
+.exp-card.d30.active-card {border-color:var(--red);box-shadow:0 0 0 2px rgba(220,38,38,.15);}
+.exp-card.d60.active-card {border-color:var(--amber);box-shadow:0 0 0 2px rgba(217,119,6,.15);}
+.exp-card.d90.active-card {border-color:var(--accent);box-shadow:0 0 0 2px rgba(37,99,235,.15);}
+
+/* TABLES */
+.tbl-wrap {overflow:auto;max-height:380px;}
+.tbl-wrap.tall {max-height:480px;}
+table {width:100%;border-collapse:collapse;}
+th {background:#f8f9fb;color:var(--text3);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;padding:8px 10px;text-align:left;white-space:nowrap;position:sticky;top:0;z-index:1;cursor:pointer;user-select:none;border-bottom:2px solid var(--border);}
+th:hover {background:#f0f2f6;color:var(--text2);}
+td {padding:7px 10px;border-bottom:1px solid #f0f3f8;font-size:12px;vertical-align:middle;}
+tr:hover td {background:#f8fbff;}
+.mono {font-family:'DM Mono',monospace;font-size:11px;}
+.days-urgent {color:var(--red);font-weight:700;}
+.days-warn {color:var(--amber);font-weight:600;}
+.days-ok {color:var(--accent2);font-weight:500;}
+.days-neg {color:var(--text3);}
+
+/* CHIPS */
+.chip {display:inline-block;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;white-space:nowrap;}
+.c-working {background:#d1fae5;color:#065f46;}
+.c-stop {background:#fee2e2;color:#991b1b;}
+.c-pending {background:#fef3c7;color:#92400e;}
+.c-new {background:#dbeafe;color:#1e40af;}
+.c-sc {background:#dbeafe;color:#1e40af;}
+.c-ext {background:#ede9fe;color:#5b21b6;}
+.c-annex {background:#f1f5f9;color:var(--text2);}
+.c-dtm {background:#fee2e2;color:#991b1b;}
+.c-dnm {background:#fef3c7;color:#92400e;}
+.c-normal {background:#d1fae5;color:#065f46;}
+.c-takec {background:#dbeafe;color:#1e40af;}
+.c-giah {background:#fef3c7;color:#92400e;}
+.c-het {background:#f1f5f9;color:var(--text2);}
+
+/* PAGINATION */
+.pag {display:flex;align-items:center;gap:6px;margin-top:10px;flex-wrap:wrap;}
+.pag button {background:#fff;border:1px solid var(--border);color:var(--text2);padding:3px 10px;border-radius:var(--rs);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;}
+.pag button:hover:not(:disabled) {border-color:var(--accent);color:var(--accent);}
+.pag button:disabled {opacity:.3;cursor:default;}
+.pg-info {font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;}
+.pg-rows {font-size:11px;color:var(--text3);margin-left:auto;}
+
+/* BUTTONS */
+.btn-exp {background:#fff;border:1px solid var(--border);color:var(--text2);padding:5px 12px;border-radius:var(--rs);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:5px;transition:all .15s;}
+.btn-exp:hover {border-color:var(--accent2);color:var(--accent2);}
+.btn-clr {background:#fff;border:1px solid var(--border);color:var(--text2);padding:5px 12px;border-radius:var(--rs);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;}
+.btn-clr:hover {border-color:var(--red);color:var(--red);}
+
+/* TC SUMMARY */
+.tc-grid {display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px;}
+.tc-card {background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:14px;text-align:center;box-shadow:var(--sh);}
+.tc-num {font-size:28px;font-weight:700;letter-spacing:-1px;}
+.tc-lbl {font-size:10px;color:var(--text2);margin-top:3px;text-transform:uppercase;letter-spacing:.4px;}
+.tc-card.dtm .tc-num {color:var(--red);}
+.tc-card.dnm .tc-num {color:var(--amber);}
+.tc-card.norm .tc-num {color:var(--accent2);}
+
+/* LOYALTY */
+.loy-row {cursor:pointer;transition:background .12s;}
+.loy-row:hover td {background:#f0f6ff!important;}
+.loy-row.active-cl td {background:#eff6ff!important;}
+
+/* QUARTERLY */
+.qtr-tabs {display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+.qtr-btn {padding:4px 14px;border:1px solid var(--border);border-radius:99px;font-size:11px;font-weight:600;cursor:pointer;background:#fff;color:var(--text2);transition:all .15s;font-family:'DM Sans',sans-serif;}
+.qtr-btn:hover {border-color:var(--accent);color:var(--accent);}
+.qtr-btn.active {background:var(--accent);color:#fff;border-color:var(--accent);}
+
+/* UPLOAD SCREEN */
+.up-screen {display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:400px;gap:14px;background:#fff;border-radius:var(--r);border:2px dashed var(--border);}
+.up-title {font-size:16px;font-weight:600;color:var(--text2);}
+.up-sub {font-size:12px;color:var(--text3);}
+
+/* TOAST */
+.toast {position:fixed;bottom:20px;right:20px;background:#fff;border:1px solid var(--border);color:var(--text);padding:10px 16px;border-radius:var(--r);font-size:12px;font-weight:500;z-index:999;box-shadow:var(--sh2);transition:all .3s;opacity:0;transform:translateY(10px);}
+.toast.show {opacity:1;transform:translateY(0);}
+.toast.success {border-color:var(--accent2);color:var(--accent2);}
+.toast.error {border-color:var(--red);color:var(--red);}
+.anim {animation:fadeUp .3s ease both;}
+@keyframes fadeUp {from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* INLINE SELECT */
+.isel {border:1px solid var(--border);border-radius:var(--rs);padding:5px 8px;font-size:11px;outline:none;font-family:'DM Sans',sans-serif;}
+.isrch {border:1px solid var(--border);border-radius:var(--rs);padding:5px 10px;font-size:12px;outline:none;font-family:'DM Sans',sans-serif;}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="logo">
+    <div class="logo-icon">BD</div>
+    <div class="logo-text">BD <span>Dashboard</span></div>
+    <div class="vd"></div>
+    <div class="mod-switcher">
+      <button class="mod-btn active" id="btn-mod-bd" onclick="switchModule('BD')">2. Service Contract</button>
+      <button class="mod-btn" id="btn-mod-rec" onclick="switchModule('REC')">4. REC (Tuyển dụng)</button>
+    </div>
+    <div class="vd"></div>
+    <div class="hdr-sub" id="data-badge">Chưa có dữ liệu — upload CSV/Excel</div>
+  </div>
+  <div class="hdr-r">
+    <div class="search-g">
+      <input type="text" id="global-search" placeholder="Tìm kiếm nhanh..." oninput="onGlobalSearch()">
+    </div>
+    <label class="upload-btn">
+      Upload CSV / Excel
+      <input type="file" id="f-upload" accept=".csv,.xlsx,.xls" style="display:none">
+    </label>
+  </div>
+</header>
+
+<!-- BD TABS BAR -->
+<div class="tabs" id="bd-tabs-bar">
+  <div class="tab active" onclick="switchTab(0)">Executive Summary</div>
+  <div class="tab" onclick="switchTab(1)">Contract Management</div>
+  <div class="tab" onclick="switchTab(2)">Customer Management</div>
+  <div class="tab" onclick="switchTab(3)">Take Care Management</div>
+</div>
+
+<!-- REC TABS BAR -->
+<div class="tabs" id="rec-tabs-bar" style="display:none">
+  <div class="tab active" onclick="switchRECTab(0)">Tổng quan tuyển dụng</div>
+  <div class="tab" onclick="switchRECTab(1)">Chi tiết Order</div>
+  <div class="tab" onclick="switchRECTab(2)">Phát sinh &amp; Hướng xử lý</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- MODULE BD CONTAINER -->
+<!-- ============================================================ -->
+<div id="module-bd-wrap">
+  <div class="main">
+  <!-- TAB 0: EXECUTIVE SUMMARY -->
+  <div class="tab-content active" id="content-0">
+    <div id="t1-upload" class="up-screen">
+      <div class="up-title">Upload file CSV hoặc Excel để bắt đầu</div>
+      <div class="up-sub">Hỗ trợ sheet "2. Service Contract" và "4.REC" cùng lúc</div>
+    </div>
+    <div id="t1-body" style="display:none">
+      <div class="fbar">
+        <div class="fg"><label>Project/Items</label><select id="fl-project" onchange="refreshAll()"><option value="">Tất cả</option></select></div>
+        <div class="fg"><label>Category</label><select id="fl-cat" onchange="refreshAll()"><option value="">Tất cả</option></select></div>
+        <div class="fg"><label>Status</label><select id="fl-status" onchange="refreshAll()"><option value="">Tất cả</option></select></div>
+        <div class="fg"><label>Take Care Status</label><select id="fl-tcs" onchange="refreshAll()"><option value="">Tất cả</option></select></div>
+        <button class="btn-reset" onclick="resetFilters()">Reset</button>
+        <span class="fl-count" id="fl-count"></span>
+      </div>
+      <div class="kpi-grid anim">
+        <div class="kpi blue">
+          <div class="kpi-lbl">Total Active Clients</div>
+          <div class="kpi-val" id="k1">—</div>
+          <div class="kpi-sub" style="line-height:1.5">Unique clients<br>Status=<b>Working</b> · Cat=SC/Ext<br>Action=Take-care / Gia hạn</div>
+        </div>
+        <div class="kpi teal">
+          <div class="kpi-lbl">Indefinite Clients</div>
+          <div class="kpi-val" id="k2">—</div>
+          <div class="kpi-sub" style="line-height:1.5">Unique clients<br>Status=<b>Working</b> · Cat=SC/Ext<br>Action=Take-care · Expired=<b>Indefinite</b></div>
+        </div>
+        <div class="kpi green">
+          <div class="kpi-lbl">Working Clients</div>
+          <div class="kpi-val" id="k3">—</div>
+          <div class="kpi-sub" style="line-height:1.5">Unique clients<br>Status=<b>Working</b> · Cat=<b>SC</b><br>Action=Take-care / Gia hạn</div>
+        </div>
+        <div class="kpi purple">
+          <div class="kpi-lbl">Returning Clients</div>
+          <div class="kpi-val" id="k4">—</div>
+          <div class="kpi-sub" style="line-height:1.5">Unique clients<br>Status=<b>Working</b> · Cat=<b>Annex (Extending)</b><br>Action=Take-care / Gia hạn</div>
+        </div>
+        <div class="kpi amber">
+          <div class="kpi-lbl">Expiring Contracts</div>
+          <div class="kpi-val" id="k5">—</div>
+          <div class="kpi-sub" style="margin-bottom:4px">Cat=SC/Ext · days ≥ 0</div>
+          <div class="kpi-pills">
+            <span class="kpill r30" id="k5-30">30d: —</span>
+            <span class="kpill r60" id="k5-60">60d: —</span>
+            <span class="kpill r90" id="k5-90">90d: —</span>
+          </div>
+        </div>
+        <div class="kpi red">
+          <div class="kpi-lbl">Renewal Required</div>
+          <div class="kpi-val" id="k6">—</div>
+          <div class="kpi-sub" style="line-height:1.5">Unique clients<br>Status=<b>Working</b> · Cat=SC/Ext<br>Action=<b>Gia hạn</b></div>
+        </div>
+      </div>
+      <!-- Row 1: 3 bar charts -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px" class="anim">
+        <div class="sc">
+          <div class="sc-title">
+            <div class="sc-tl">Status Overview <span class="badge b-gray" id="ch4-n">0</span></div>
+            <span style="font-size:10px;color:var(--text3)">Click để xem danh sách</span>
+          </div>
+          <div id="ch-status"></div>
+        </div>
+        <div class="sc">
+          <div class="sc-title"><div class="sc-tl">Category <span class="badge b-blue" id="ch1-n">0</span></div></div>
+          <div id="ch-cat"></div>
+        </div>
+        <div class="sc">
+          <div class="sc-title"><div class="sc-tl">Take Care Status <span class="badge b-amber" id="ch3-n">0</span></div></div>
+          <div id="ch-tcs"></div>
+        </div>
+      </div>
+      <!-- Status client panel -->
+      <div class="sc anim" id="status-client-panel" style="display:none;margin-bottom:14px">
+        <div class="sc-title">
+          <div class="sc-tl">Status: <span id="status-panel-title">—</span> <span class="badge b-gray" id="status-panel-badge">0</span></div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input id="status-client-search" oninput="renderStatusClientTable()" placeholder="Tìm client..." class="isrch" style="width:150px">
+            <button class="btn-clr" onclick="closeStatusPanel()">Đóng</button>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:10px;padding:8px 10px;background:var(--surface);border-radius:var(--rs);font-size:11px;color:var(--text3)">
+          <span style="font-weight:600;color:var(--text2)">Điều kiện lọc:</span>
+          <span class="badge b-gray" id="status-panel-filter-badge">Status = —</span>
+          <span style="color:var(--border2)">·</span>
+          <span style="font-style:italic">Tất cả records khớp status này trong FILTERED</span>
+        </div>
+        <div class="tbl-wrap" style="max-height:320px">
+          <table>
+            <thead><tr>
+              <th>Client Name</th>
+              <th>Category</th>
+              <th>Project/Items</th>
+              <th>Contract/Annex</th>
+              <th>Effective Day</th>
+              <th>Duration Expired</th>
+              <th>Next Action</th>
+              <th>Take Care Status</th>
+            </tr></thead>
+            <tbody id="status-client-body"></tbody>
+          </table>
+        </div>
+        <div class="pag">
+          <button id="scp-prev" onclick="pg('scp',-1)">‹</button>
+          <span class="pg-info" id="scp-page">1/1</span>
+          <button id="scp-next" onclick="pg('scp',1)">›</button>
+          <span class="pg-rows" id="scp-rows"></span>
+        </div>
+      </div>
+      <!-- Row 2: Category Trend + Project -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px" class="anim">
+        <div class="sc">
+          <div class="sc-title">
+            <div class="sc-tl">Category Trend (3 Years)</div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <span style="font-size:11px;color:var(--text3)">Năm kết thúc:</span>
+              <select id="fl-trend-year" class="isel" onchange="renderCategoryTrend()"></select>
+            </div>
+          </div>
+          <div id="ch-trend"></div>
+        </div>
+        <div class="sc">
+          <div class="sc-title"><div class="sc-tl">Project / Items <span class="badge b-green" id="ch2-n">0</span></div>
+            <span style="font-size:10px;color:var(--text3)">Unique clients · Working · Take-care/Gia hạn · Click để xem danh sách</span>
+          </div>
+          <div id="ch-proj"></div>
+        </div>
+      </div>
+      <!-- Client list panel -->
+      <div class="sc anim" id="proj-client-panel" style="display:none;margin-bottom:14px">
+        <div class="sc-title">
+          <div class="sc-tl"><span id="proj-panel-title">—</span> <span class="badge b-green" id="proj-panel-badge">0</span></div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input id="proj-client-search" oninput="renderProjClientTable()" placeholder="Tìm client..." class="isrch" style="width:150px">
+            <button class="btn-clr" onclick="closeProjPanel()">Đóng</button>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:10px;padding:8px 10px;background:var(--surface);border-radius:var(--rs);font-size:11px;color:var(--text3)">
+          <span style="font-weight:600;color:var(--text2)">Điều kiện lọc:</span>
+          <span class="badge b-green">Status = Working</span>
+          <span style="color:var(--border2)">·</span>
+          <span class="badge b-blue">Action = Take-care / Gia hạn</span>
+          <span style="color:var(--border2)">·</span>
+          <span class="badge b-gray">Unique Client</span>
+          <span style="color:var(--border2)">·</span>
+          <span style="color:var(--text3);font-style:italic">Nếu 1 client có nhiều hợp đồng chỉ lấy hợp đồng có Duration Expired mới nhất</span>
+        </div>
+        <div class="tbl-wrap" style="max-height:320px">
+          <table>
+            <thead><tr>
+              <th>Client Name</th>
+              <th>Category</th>
+              <th>Contract/Annex</th>
+              <th>Effective Day</th>
+              <th>Duration Expired</th>
+              <th>Next Action</th>
+              <th>Take Care Status</th>
+            </tr></thead>
+            <tbody id="proj-client-body"></tbody>
+          </table>
+        </div>
+        <div class="pag">
+          <button id="pcp-prev" onclick="pg('pcp',-1)">‹</button>
+          <span class="pg-info" id="pcp-page">1/1</span>
+          <button id="pcp-next" onclick="pg('pcp',1)">›</button>
+          <span class="pg-rows" id="pcp-rows"></span>
+        </div>
+      </div>
+      <!-- Quarterly new clients -->
+      <div class="sc anim">
+        <div class="sc-title">
+          <div class="sc-tl">
+             <span id="qtr-title-lbl">Khách hàng mới theo Quý 2026</span>
+             <span class="badge b-blue" id="qtr-total-badge">0</span>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <div style="display:flex;align-items:center;gap:6px">
+              <span style="font-size:11px;color:var(--text3)">Chọn Năm:</span>
+              <select id="fl-qtr-year" class="isel" onchange="onQtrYearChange()"></select>
+            </div>
+            <input id="qtr-search" oninput="renderQtrTables()" placeholder="Tìm..." class="isrch" style="width:130px">
+            <button class="btn-exp" onclick="exportExcel('qtr')">Export</button>
+          </div>
+        </div>
+        <div class="qtr-tabs">
+          <button class="qtr-btn active" onclick="setQtr('all',this)">Tất cả</button>
+          <button class="qtr-btn" onclick="setQtr('Q1',this)">Q1 (Jan–Mar)</button>
+          <button class="qtr-btn" onclick="setQtr('Q2',this)">Q2 (Apr–Jun)</button>
+          <button class="qtr-btn" onclick="setQtr('Q3',this)">Q3 (Jul–Sep)</button>
+          <button class="qtr-btn" onclick="setQtr('Q4',this)">Q4 (Oct–Dec)</button>
+        </div>
+        <div id="qtr-content"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 1: CONTRACT MANAGEMENT -->
+  <div class="tab-content" id="content-1">
+    <div class="expiry-grid anim">
+      <div class="exp-card d30" id="card-exp30" onclick="filterByExpiry(30)">
+        <div class="exp-num" id="c-exp30">—</div>
+        <div class="exp-lbl">Hết hạn ≤ 30 ngày</div>
+        <div class="exp-hint">Click để lọc bảng</div>
+      </div>
+      <div class="exp-card d60" id="card-exp60" onclick="filterByExpiry(60)">
+        <div class="exp-num" id="c-exp60">—</div>
+        <div class="exp-lbl">Hết hạn ≤ 60 ngày</div>
+        <div class="exp-hint">Click để lọc bảng</div>
+      </div>
+      <div class="exp-card d90" id="card-exp90" onclick="filterByExpiry(90)">
+        <div class="exp-num" id="c-exp90">—</div>
+        <div class="exp-lbl">Hết hạn ≤ 90 ngày</div>
+        <div class="exp-hint">Click để lọc bảng</div>
+      </div>
+    </div>
+    <div class="sc anim">
+      <div class="sc-title">
+        <div class="sc-tl"><span id="c-tbl-lbl">Service Contract &amp; Annex (Extending)</span> <span class="badge b-blue" id="c-badge">0</span></div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <input id="c-search" oninput="renderContractTable()" placeholder="Tìm..." class="isrch" style="width:160px">
+          <select id="c-fl-cat" onchange="renderContractTable()" class="isel">
+            <option value="">Tất cả Category</option>
+            <option>Service Contract</option><option>Annex (Extending)</option>
+          </select>
+          <button class="btn-exp" onclick="exportExcel('contract')">Export Excel</button>
+        </div>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr>
+            <th onclick="sortTbl('contract','client')">Client Name</th>
+            <th onclick="sortTbl('contract','project')">Project/Items</th>
+            <th onclick="sortTbl('contract','contract')">Contract/Annex</th>
+            <th onclick="sortTbl('contract','category')">Category</th>
+            <th onclick="sortTbl('contract','effective')">Effective Day</th>
+            <th onclick="sortTbl('contract','expired')">Duration Expired</th>
+            <th onclick="sortTbl('contract','days')">Số ngày</th>
+            <th onclick="sortTbl('contract','action')">Next Action</th>
+            <th onclick="sortTbl('contract','status')">Status</th>
+          </tr></thead>
+          <tbody id="c-body"></tbody>
+        </table>
+      </div>
+      <div class="pag">
+        <button id="c-prev" onclick="pg('contract',-1)">‹</button>
+        <span class="pg-info" id="c-page">1/1</span>
+        <button id="c-next" onclick="pg('contract',1)">›</button>
+        <span class="pg-rows" id="c-rows"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: CUSTOMER MANAGEMENT -->
+  <div class="tab-content" id="content-2">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px" class="anim">
+      <div class="sc" id="card-working" onclick="filterCustBy('working')" style="cursor:pointer">
+        <div class="kpi-lbl">Working Customers</div>
+        <div style="font-size:34px;font-weight:700;color:var(--accent2);letter-spacing:-2px;margin:6px 0" id="cust-wk">—</div>
+        <div style="font-size:11px;color:var(--text3)">Service Contract · Working · Click để lọc</div>
+      </div>
+      <div class="sc" id="card-returning" onclick="filterCustBy('returning')" style="cursor:pointer">
+        <div class="kpi-lbl">Returning Customers</div>
+        <div style="font-size:34px;font-weight:700;color:var(--purple);letter-spacing:-2px;margin:6px 0" id="cust-rt">—</div>
+        <div style="font-size:11px;color:var(--text3)">Annex (Extending) · Working · Click để lọc</div>
+      </div>
+    </div>
+    <div class="sc anim" style="margin-bottom:14px">
+      <div class="sc-title">
+        <div class="sc-tl">Thống kê gắn bó <span class="badge b-blue" id="loyalty-badge">0</span></div>
+        <input id="loyalty-search" oninput="renderLoyaltyTable()" placeholder="Tìm..." class="isrch" style="width:130px">
+      </div>
+      <div class="tbl-wrap" style="max-height:280px">
+        <table>
+          <thead><tr>
+            <th onclick="sortLoy('client')">Client</th>
+            <th onclick="sortLoy('sc')" style="text-align:center">SC</th>
+            <th onclick="sortLoy('ext')" style="text-align:center">Ext</th>
+            <th onclick="sortLoy('from_yr')" style="text-align:center">Từ năm</th>
+            <th onclick="sortLoy('to_yr')" style="text-align:center">Đến</th>
+            <th onclick="sortLoy('years')" style="text-align:center">Số năm</th>
+          </tr></thead>
+          <tbody id="loyalty-body"></tbody>
+        </table>
+      </div>
+      <div class="pag">
+        <button id="loy-prev" onclick="pg('loyalty',-1)">‹</button>
+        <span class="pg-info" id="loy-page">1/1</span>
+        <button id="loy-next" onclick="pg('loyalty',1)">›</button>
+        <span class="pg-rows" id="loy-rows"></span>
+      </div>
+    </div>
+    <div class="sc anim">
+      <div class="sc-title">
+        <div class="sc-tl"><span id="cust-tbl-lbl">Working Customers</span> <span class="badge b-green" id="cust-badge">0</span></div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <input id="cust-search" oninput="renderCustTable()" placeholder="Tìm client..." class="isrch" style="width:140px">
+          <select id="cust-fl-cat" onchange="renderCustTable()" class="isel">
+            <option value="">Tất cả Category</option>
+            <option>Service Contract</option><option>Annex (Extending)</option>
+          </select>
+          <select id="cust-fl-action" onchange="renderCustTable()" class="isel">
+            <option value="">Tất cả Action</option>
+            <option>Take-care</option><option>Gia hạn</option><option>Hết hiệu lực</option>
+          </select>
+          <select id="cust-fl-years" onchange="renderCustTable()" class="isel">
+            <option value="">Tất cả số năm</option>
+            <option value="lt1">&lt; 1 năm</option>
+            <option value="1to3">1 – 3 năm</option>
+            <option value="3to5">3 – 5 năm</option>
+            <option value="gt5">&gt; 5 năm</option>
+          </select>
+          <button class="btn-clr" id="cust-clear-btn" onclick="clearCustFilter()" style="display:none">Bỏ lọc</button>
+          <button class="btn-exp" onclick="exportExcel('customer')">Export</button>
+        </div>
+      </div>
+      <div class="tbl-wrap tall">
+        <table>
+          <thead><tr>
+            <th onclick="sortTbl('customer','client')">Client Name</th>
+            <th onclick="sortTbl('customer','category')">Category</th>
+            <th onclick="sortTbl('customer','project')">Project/Items</th>
+            <th onclick="sortTbl('customer','contract')">Contract/Annex</th>
+            <th onclick="sortTbl('customer','action')">Next Action</th>
+            <th onclick="sortTbl('customer','effective')">Effective Day</th>
+            <th onclick="sortTbl('customer','expired')">Duration Expired</th>
+            <th style="text-align:center">Số năm</th>
+            <th onclick="sortTbl('customer','tcs')">Take Care Status</th>
+          </tr></thead>
+          <tbody id="cust-body"></tbody>
+        </table>
+      </div>
+      <div class="pag">
+        <button id="cust-prev" onclick="pg('customer',-1)">‹</button>
+        <span class="pg-info" id="cust-page">1/1</span>
+        <button id="cust-next" onclick="pg('customer',1)">›</button>
+        <span class="pg-rows" id="cust-rows"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: TAKE CARE MANAGEMENT -->
+  <div class="tab-content" id="content-3">
+    <div class="tc-grid anim">
+      <div class="tc-card dtm"><div class="tc-num" id="tc-dtm">—</div><div class="tc-lbl">Due This Month</div></div>
+      <div class="tc-card dnm"><div class="tc-num" id="tc-dnm">—</div><div class="tc-lbl">Due Next Month</div></div>
+      <div class="tc-card norm"><div class="tc-num" id="tc-norm">—</div><div class="tc-lbl">Normal</div></div>
+    </div>
+    <div class="sc anim">
+      <div class="sc-title">
+        <div class="sc-tl">Take Care Detail <span class="badge b-blue" id="tc-badge">0</span></div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <input id="tc-search" oninput="renderTCTable()" placeholder="Tìm client..." class="isrch" style="width:150px">
+          <select id="tc-fl" onchange="renderTCTable()" class="isel">
+            <option value="">Tất cả TCS</option>
+            <option>DUE THIS MONTH</option><option>DUE NEXT MONTH</option><option>NORMAL</option>
+          </select>
+          <button class="btn-exp" onclick="exportExcel('takecare')">Export</button>
+        </div>
+      </div>
+      <div class="tbl-wrap tall">
+        <table>
+          <thead><tr>
+            <th onclick="sortTbl('tc','client')">Client Name</th>
+            <th onclick="sortTbl('tc','category')">Category</th>
+            <th onclick="sortTbl('tc','project')">Project/Items</th>
+            <th onclick="sortTbl('tc','tcs')">Take Care Status</th>
+            <th onclick="sortTbl('tc','lastTC')">Last Take Care</th>
+            <th onclick="sortTbl('tc','nextTC')">Next Take Care</th>
+            <th onclick="sortTbl('tc','action')">Next Action</th>
+          </tr></thead>
+          <tbody id="tc-body"></tbody>
+        </table>
+      </div>
+      <div class="pag">
+        <button id="tc-prev" onclick="pg('tc',-1)">‹</button>
+        <span class="pg-info" id="tc-page">1/1</span>
+        <button id="tc-next" onclick="pg('tc',1)">›</button>
+        <span class="pg-rows" id="tc-rows"></span>
+      </div>
+    </div>
+  </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- MODULE 4.REC CONTAINER (ĐÃ LỌC BỎ CÁC DÒNG DƯ THỪA) -->
+<!-- ============================================================ -->
+<div id="module-rec-wrap" style="display:none">
+  <div class="main">
+    <!-- REC FILTER BAR -->
+    <div class="fbar">
+      <div class="fg"><label>Tháng BC</label><select id="rec-fl-month" onchange="refreshREC()"><option value="">Tất cả thời gian</option></select></div>
+      <div class="fg"><label>Khách Hàng</label><select id="rec-fl-client" onchange="refreshREC()"><option value="">Tất cả khách hàng</option></select></div>
+      <div class="fg"><label>Tỉnh Thành Mới</label><select id="rec-fl-provnew" onchange="refreshREC()"><option value="">Tất cả tỉnh thành mới</option></select></div>
+      <div class="fg"><label>Trạng Thái Order</label><select id="rec-fl-status" onchange="refreshREC()"><option value="">Tất cả trạng thái</option></select></div>
+      <div class="fg"><label>Mức Độ</label><select id="rec-fl-level" onchange="refreshREC()"><option value="">Tất cả mức độ</option></select></div>
+      <button class="btn-reset" onclick="resetRECFilters()">Reset</button>
+      <span class="fl-count" id="rec-fl-count">0 / 0</span>
+    </div>
+
+    <!-- REC TAB 0: TỔNG QUAN -->
+    <div class="rec-tab-content active" id="rec-content-0">
+      <div class="kpi-grid anim" style="grid-template-columns: repeat(4, 1fr);">
+        <div class="kpi blue">
+          <div class="kpi-lbl">Tổng Order ghi nhận</div>
+          <div class="kpi-val" id="rec-m-recorded">0</div>
+          <div class="kpi-sub">Số dòng order hợp lệ theo bộ lọc</div>
+        </div>
+        <div class="kpi teal">
+          <div class="kpi-lbl">Tổng vị trí tuyển</div>
+          <div class="kpi-val" id="rec-m-open">0</div>
+          <div class="kpi-sub">Tổng SL vị trí cần tuyển</div>
+        </div>
+        <div class="kpi amber">
+          <div class="kpi-lbl">SL CV gửi nội bộ</div>
+          <div class="kpi-val" id="rec-m-internal">0</div>
+          <div class="kpi-sub">Chỉ tính CV nội bộ</div>
+        </div>
+        <div class="kpi purple">
+          <div class="kpi-lbl">Tỷ lệ CV onboard</div>
+          <div class="kpi-val" id="rec-m-rate">0%</div>
+          <div class="kpi-sub">CV onboard / tổng CV nội bộ</div>
+        </div>
+      </div>
+
+      <div class="sc anim">
+        <div class="sc-title"><div class="sc-tl">Vận Hành Tuyển Dụng — Các Chỉ Số Tổng Hợp</div></div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:10px;text-align:center">
+          <div style="background:var(--surface);padding:10px;border-radius:var(--rs)"><div style="font-size:10px;color:var(--text3);font-weight:600">SL VỊ TRÍ</div><div id="rec-c-orders" style="font-size:20px;font-weight:700;margin-top:4px;color:var(--text)">0</div></div>
+          <div style="background:var(--surface);padding:10px;border-radius:var(--rs)"><div style="font-size:10px;color:var(--text3);font-weight:600">SL CV NỘI BỘ</div><div id="rec-c-cv" style="font-size:20px;font-weight:700;margin-top:4px;color:var(--accent)">0</div></div>
+          <div style="background:var(--surface);padding:10px;border-radius:var(--rs)"><div style="font-size:10px;color:var(--text3);font-weight:600">CV KH GỬI</div><div id="rec-c-client" style="font-size:20px;font-weight:700;margin-top:4px;color:var(--purple)">0</div></div>
+          <div style="background:var(--surface);padding:10px;border-radius:var(--rs)"><div style="font-size:10px;color:var(--text3);font-weight:600">CV PASS PV</div><div id="rec-c-pass" style="font-size:20px;font-weight:700;margin-top:4px;color:var(--accent2)">0</div></div>
+          <div style="background:var(--surface);padding:10px;border-radius:var(--rs)"><div style="font-size:10px;color:var(--text3);font-weight:600">CV BẢO HÀNH</div><div id="rec-c-warranty" style="font-size:20px;font-weight:700;margin-top:4px;color:var(--teal)">0</div></div>
+          <div style="background:var(--surface);padding:10px;border-radius:var(--rs)"><div style="font-size:10px;color:var(--text3);font-weight:600">KHÔNG NHẬN VIỆC</div><div id="rec-c-nojoin" style="font-size:20px;font-weight:700;margin-top:4px;color:var(--red)">0</div></div>
+          <div style="background:var(--surface);padding:10px;border-radius:var(--rs)"><div style="font-size:10px;color:var(--text3);font-weight:600">CV ONBOARD</div><div id="rec-c-onboard" style="font-size:20px;font-weight:700;margin-top:4px;color:var(--accent2)">0</div></div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:2fr 3fr;gap:14px;margin-bottom:14px" class="anim">
+        <div class="sc">
+          <div class="sc-title"><div class="sc-tl">Nguồn Ứng Viên</div></div>
+          <div style="display:flex;flex-direction:column;gap:12px;margin-top:10px">
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:11px"><span>CV Nội bộ</span><b id="rec-src-int-val">0 CV</b></div>
+              <div class="bar-track"><div class="bar-fill" id="rec-src-int-bar" style="width:0%;background:var(--accent)"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:11px"><span>CV Khách hàng gửi</span><b id="rec-src-cli-val">0 CV</b></div>
+              <div class="bar-track"><div class="bar-fill" id="rec-src-cli-bar" style="width:0%;background:var(--purple)"></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="sc">
+          <div class="sc-title"><div class="sc-tl">Phân Bổ Theo Tỉnh Thành Mới</div></div>
+          <div id="rec-prov-bars" class="tbl-wrap" style="max-height:200px"></div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px" class="anim">
+        <div class="sc">
+          <div class="sc-title"><div class="sc-tl">Nhu cầu theo vị trí tuyển dụng</div></div>
+          <div id="rec-pos-list" class="tbl-wrap" style="max-height:240px"></div>
+        </div>
+        <div class="sc">
+          <div class="sc-title">
+            <div class="sc-tl">Order cần ưu tiên</div>
+            <span class="badge b-red" id="rec-urgent-badge">0 nghiêm trọng</span>
+          </div>
+          <div id="rec-urgent-list" class="tbl-wrap" style="max-height:240px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REC TAB 1: CHI TIẾT ORDER -->
+    <div class="rec-tab-content" id="rec-content-1">
+      <div class="sc anim">
+        <div class="sc-title">
+          <div class="sc-tl">Danh Sách Chi Tiết Order <span class="badge b-blue" id="rec-tbl-badge">0</span></div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <input id="rec-search" oninput="renderRECTable()" placeholder="Tìm kiếm order..." class="isrch" style="width:180px">
+            <button class="btn-exp" onclick="exportRECExcel()">Export Excel REC</button>
+          </div>
+        </div>
+        <div class="tbl-wrap tall">
+          <table>
+            <thead>
+              <tr>
+                <th>Mã Order</th>
+                <th>Khách Hàng / Vị Trí</th>
+                <th>Tỉnh Mới</th>
+                <th>PIC Phụ Trách</th>
+                <th style="text-align:center">SL Order</th>
+                <th style="text-align:center">SL CV Gửi</th>
+                <th>Ngày Nhận</th>
+                <th>Trạng Thái Order</th>
+                <th>Mức Độ</th>
+                <th>Ghi Chú</th>
+              </tr>
+            </thead>
+            <tbody id="rec-tbl-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- REC TAB 2: PHÁT SINH & HƯỚNG GIẢI QUYẾT -->
+    <div class="rec-tab-content" id="rec-content-2">
+      <div class="sc anim">
+        <div class="sc-title">
+          <div class="sc-tl">Trường hợp phát sinh &amp; Hướng giải quyết</div>
+          <select id="rec-issue-filter" onchange="renderRECIssues()" class="isel">
+            <option value="">Tất cả tiến độ xử lý</option>
+            <option value="Đang xử lý">Đang xử lý</option>
+            <option value="Không giải quyết được">Không giải quyết được</option>
+            <option value="Đã xong">Đã xong / Hoàn thành</option>
+          </select>
+        </div>
+        <div id="rec-issue-list" style="display:flex;flex-direction:column;gap:12px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// GLOBAL STATE
+var ALL=[], FILTERED=[];
+var REC_ALL=[], REC_FILTERED=[];
+var CURRENT_MODULE = 'BD';
+var REC_CURRENT_TAB = 0;
+var PAGES={contract:1,customer:1,tc:1,loyalty:1,pcp:1,scp:1};
+var SORTS={contract:{col:'days',dir:1},customer:{col:'client',dir:1},tc:{col:'tcs',dir:1}};
+var PAGE_SIZE=20;
+var CONTRACT_EXPIRY_FILTER=null;
+var CUST_GROUP=null, CUST_CLIENT=null;
+var CONTRACT_DATA=[], CUST_DATA=[], LOYALTY_DATA=[], TC_DATA=[], QTR_DATA=[];
+var LOY_SORT={col:'years',dir:-1};
+var QTR_FILTER='all';
+var GLOBAL_SEARCH='';
+var TODAY=new Date(), TODAY_MS=TODAY.getTime();
+var TC_PRI={'DUE THIS MONTH':0,'DUE NEXT MONTH':1,'NORMAL':2,'#NUM!':3,'':4};
+var STATUS_ORDER={New:0,Working:1,Pending:2,Stop:3};
+var MONTHS_EN={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11,january:0,february:1,march:2,april:3,may:4,june:5,july:6,august:7,september:8,october:9,november:10,december:11};
+
+// UPLOAD FUNCTIONALITY
+document.getElementById('f-upload').addEventListener('change', function(e) {
+  var file=e.target.files[0]; if(!file) return;
+  var reader=new FileReader();
+  if(file.name.toLowerCase().endsWith('.csv')) {
+    reader.onload=function(ev) { try { parseCSV(ev.target.result); } catch(err) { toast('Lỗi CSV: '+err.message,'error'); } };
+    reader.readAsText(file,'UTF-8');
+  } else {
+    reader.onload=function(ev) {
+      try {
+        var wb=XLSX.read(ev.target.result);
+        var bdName=wb.SheetNames.filter(function(n){return n.indexOf('Service Contract')!==-1;})[0]||wb.SheetNames[0];
+        if(bdName && wb.Sheets[bdName]) {
+          var arrBD=XLSX.utils.sheet_to_json(wb.Sheets[bdName],{header:1,defval:'',raw:false});
+          parseRows(arrBD);
+        }
+        var recName=wb.SheetNames.filter(function(n){return n.indexOf('4.REC')!==-1 || n.indexOf('REC')!==-1;})[0];
+        if(recName && wb.Sheets[recName]) {
+          var arrREC=XLSX.utils.sheet_to_json(wb.Sheets[recName],{header:1,defval:'',raw:false});
+          parseRECRows(arrREC);
+        }
+        document.getElementById('data-badge').textContent='BD: '+ALL.length+' records • REC: '+REC_ALL.length+' orders';
+        toast('Đã nạp dữ liệu Excel thành công!','success');
+      } catch(err) { toast('Lỗi Excel: '+err.message,'error'); }
+    };
+    reader.readAsArrayBuffer(file);
+    e.target.value='';
+  }
+});
+
+function parseCSV(text) { parseRows(text.split(/\r?\n/).map(function(l){return l.split(';');})); }
+
+// DATE HELPERS
+function parseDate(s) {
+  if(!s||s==='Indefinite'||s===''||s==='#NUM!') return null;
+  s=String(s).trim();
+  var m=s.match(/^(\d{1,2})+[\/\-]([A-Za-z]+)+[\/\-](\d{4})$/i);
+  if(m) { var mo=MONTHS_EN[m[2].toLowerCase()]; if(mo!==undefined) return new Date(+m[3],mo,+m[1]); }
+  m=s.match(/^(\d{1,2})\-([A-Za-z]+)\-(\d{2,4})$/);
+  if(m) { var yr=+m[3]; if(yr<100) yr+=2000; var mo=MONTHS_EN[m[2].toLowerCase()]; if(mo!==undefined) return new Date(yr,mo,+m[1]); }
+  var d=new Date(s);
+  return isNaN(d.getTime())?null:d;
+}
+function fmtDate(s) {
+  var d=parseDate(s);
+  if(!d) return s||'—';
+  return d.getDate().toString().padStart(2,'0')+'/'+(d.getMonth()+1).toString().padStart(2,'0')+'/'+d.getFullYear();
+}
+function getQuarter(d) { return d?'Q'+(Math.floor(d.getMonth()/3)+1):null; }
+function normalizeCategory(cat) {
+  cat = (cat || '').trim();
+  if (cat === 'Extending') return 'Annex (Extending)';
+  return cat;
+}
+
+// PARSE BD DATA
+function parseRows(arr) {
+  var hi=4;
+  for(var i=0;i<Math.min(10,arr.length);i++) {
+    if(arr[i]&&String(arr[i][5]||'').trim()==='STT'){hi=i;break;}
+  }
+  ALL=arr.slice(hi+1).filter(function(r){return r[5]&&/^\d+$/.test(String(r[5]).trim());}).map(function(r){
+    var client=String(r[10]||'').split('\n')[0].trim().replace(/^[\d\.\s]+/, '').trim();
+    var d=parseInt(String(r[17]||'').trim());
+    return {
+      stt:String(r[5]||'').trim(), status:String(r[6]||'').trim(), folder:String(r[7]||'').trim(),
+      tracking:String(r[9]||'').trim(), client:client, project:String(r[11]||'').trim(),
+      contract:String(r[12]||'').trim(), category:normalizeCategory(String(r[13]||'').trim()),
+      effective:String(r[15]||'').trim(), expired:String(r[16]||'').trim(),
+      days:isNaN(d)?null:d, cycle:String(r[18]||'').trim(),
+      lastTC:String(r[19]||'').trim(), nextTC:String(r[20]||'').trim(),
+      tcs:String(r[21]||'').trim(), action:String(r[22]||'').trim()
+    };
+  });
+  document.getElementById('t1-upload').style.display='none';
+  document.getElementById('t1-body').style.display='block';
+  buildFilters();
+  initYearFilters();
+  refreshAll();
+}
+
+// PARSE 4.REC DATA (LOẠI BỎ CHÍNH XÁC CÁC DÒNG RÁC, DÒNG HƯỚNG DẪN & HEADER LẶP)
+function parseRECRows(arr) {
+  var hi = 4; // Header chuẩn nằm ở Dòng 5 (index 4)[cite: 1]
+  for(var i=0; i<Math.min(10, arr.length); i++) {
+    if(arr[i] && String(arr[i][1]||'').trim().toLowerCase().includes('khách hàng')) { hi=i; break; }
+  }
+  
+  // Bắt đầu đọc từ dòng 6 (index hi + 1)[cite: 1]
+  REC_ALL = arr.slice(hi+1).filter(r => {
+    if (!r || !r[1]) return false;
+    var clientStr = String(r[1]).trim();
+    var codeOrderStr = String(r[30] || '').trim();
+    
+    // Loại bỏ các dòng hướng dẫn/mẫu và dòng Header lặp lại[cite: 4, 5]
+    if (clientStr === '' || 
+        clientStr.includes('Chọn từ dropdown') || 
+        clientStr.includes('Khách Hàng') || 
+        codeOrderStr.includes('⚡ Tự động') || 
+        codeOrderStr.includes('Mã Order')) {
+      return false;
+    }
+    return true;
+  }).map((r, idx) => {
+    var slOrder = parseInt(r[11]) || 0; // Cột L[cite: 1]
+    var cvOnboard = parseInt(r[17]) || 0; // Cột R[cite: 1]
+    var gap = parseInt(r[18]); if(isNaN(gap)) gap = slOrder - cvOnboard; // Cột S[cite: 1]
+    var level = String(r[27]||'').trim(); if(!level || level.includes('Nhập tay')) level = 'Bình thường'; // Cột AB[cite: 1]
+    var resolved = String(r[35]||'').trim(); if(!resolved || resolved.includes('Nhập tay')) resolved = 'Đang xử lý'; // Cột AJ[cite: 1]
+
+    return {
+      stt: String(r[0]||'').trim() || (idx + 1),
+      client: String(r[1]||'').trim(),          // B: Khách Hàng[cite: 1]
+      industry: String(r[2]||'').trim(),        // C: Nhóm Ngành[cite: 1]
+      position: String(r[3]||'').trim(),        // D: Vị Trí Tuyển[cite: 1]
+      provOld: String(r[4]||'').trim(),         // E: Tỉnh cũ[cite: 1]
+      provNew: String(r[5]||'').trim(),         // F: Tỉnh mới[cite: 1]
+      area: String(r[6]||'').trim(),            // G: Khu vực[cite: 1]
+      region: String(r[7]||'').trim(),          // H: Miền[cite: 1]
+      code: String(r[8]||'').trim(),            // I: Code[cite: 1]
+      defOther: String(r[9]||'').trim(),        // J: Định nghĩa khác[cite: 1]
+      picKH: String(r[10]||'').trim(),          // K: PIC KH[cite: 1]
+      slOrder: slOrder,                         // L: SL Order[cite: 1]
+      slCVSent: parseInt(r[12]) || 0,           // M: SL CV Gửi[cite: 1]
+      cvKHSent: parseInt(r[13]) || 0,           // N: CV KH gửi[cite: 1]
+      cvPassPV: parseInt(r[14]) || 0,           // O: CV Pass PV[cite: 1]
+      cvWarranty: parseInt(r[15]) || 0,         // P: CV Bảo hành[cite: 1]
+      cvNoAccept: parseInt(r[16]) || 0,         // Q: Không nhận việc[cite: 1]
+      cvOnboard: cvOnboard,                     // R: CV onboard[cite: 1]
+      gap: gap,                                 // S: Gap[cite: 1]
+      dateReceived: String(r[19]||'').trim(),   // T: Ngày Nhận Order[cite: 1]
+      deadline: String(r[20]||'').trim(),       // U: Deadline[cite: 1]
+      dateFirstCV: String(r[21]||'').trim(),    // V: Ngày Gửi CV Đầu Tiên[cite: 1]
+      dateLastCV: String(r[22]||'').trim(),     // W: Ngày Gửi CV Gần Nhất[cite: 1]
+      orderStatus: String(r[23]||'').trim(),    // X: Trạng Thái Order[cite: 1]
+      kpiSent: String(r[24]||'').trim(),        // Y: KPI gửi CV[cite: 1]
+      pendingDays: parseInt(r[25]) || 0,        // Z: Số Ngày Pending[cite: 1]
+      rateTT: String(r[26]||'').trim(),         // AA: Tỷ Lệ TT %[cite: 1]
+      level: level,                             // AB: Mức Độ[cite: 1]
+      month: String(r[28]||'').trim(),          // AC: Tháng[cite: 1]
+      codeKH: String(r[29]||'').trim(),         // AD: Mã KH[cite: 1]
+      codeOrder: String(r[30]||'').trim() || ('ORD-' + (idx+1)), // AE: Mã Order[cite: 1]
+      picRC: String(r[31]||'').trim(),          // AF: PIC Phụ Trách[cite: 1]
+      issue: String(r[32]||'').trim(),          // AG: Vấn Đề Phát Sinh[cite: 1]
+      loggedDate: String(r[33]||'').trim(),     // AH: Ngày Ghi Nhận[cite: 1]
+      proposalRC: String(r[34]||'').trim(),     // AI: Đề Xuất Bởi RC[cite: 1]
+      resolved: resolved,                       // AJ: Đã Giải Quyết?[cite: 1]
+      note: String(r[36]||'').trim()            // AK: Ghi Chú[cite: 1]
+    };
+  });
+  buildRECFilters();
+  refreshREC();
+}
+
+// BD & REC FILTERS
+function getAvailableYears() {
+  var yrsSet = new Set();
+  ALL.forEach(function(r) { var d = parseDate(r.effective); if(d) yrsSet.add(d.getFullYear()); });
+  var yrs = Array.from(yrsSet).sort(function(a,b){return a-b;});
+  if(!yrs.length) yrs = [2024, 2025, 2026];
+  return yrs;
+}
+function initYearFilters() {
+  var yrs = getAvailableYears();
+  var trendSel = document.getElementById('fl-trend-year');
+  if(trendSel) {
+    var maxYr = Math.max.apply(null, yrs);
+    trendSel.innerHTML = yrs.map(function(y) { return '<option value="'+y+'" '+(y===maxYr?'selected':'')+'>'+y+'</option>'; }).join('');
+  }
+  var qtrSel = document.getElementById('fl-qtr-year');
+  if(qtrSel) {
+    var curYr = 2026; if(yrs.indexOf(curYr) === -1) curYr = yrs[yrs.length - 1];
+    qtrSel.innerHTML = yrs.map(function(y) { return '<option value="'+y+'" '+(y===curYr?'selected':'')+'>'+y+'</option>'; }).join('');
+    var lbl = document.getElementById('qtr-title-lbl'); if(lbl) lbl.textContent = 'Khách hàng mới theo Quý ' + curYr;
+  }
+}
+function buildFilters() {
+  function uniq(key){var s={},o=[];ALL.forEach(function(r){if(r[key]&&!s[r[key]]){s[r[key]]=1;o.push(r[key]);}});return o.sort();}
+  function fill(id,vals) {
+    var el=document.getElementById(id); if(!el) return;
+    var f=el.options[0].outerHTML;
+    el.innerHTML=f+vals.map(function(v){return '<option>'+v+'</option>';}).join('');
+  }
+  fill('fl-project',uniq('project'));
+  fill('fl-cat',uniq('category'));
+  fill('fl-status',uniq('status'));
+  fill('fl-tcs',uniq('tcs'));
+}
+function getFiltered() {
+  var pr=document.getElementById('fl-project').value;
+  var ca=document.getElementById('fl-cat').value;
+  var st=document.getElementById('fl-status').value;
+  var tc=document.getElementById('fl-tcs').value;
+  var gs=GLOBAL_SEARCH.toLowerCase();
+  return ALL.filter(function(r) {
+    if(pr&&r.project!==pr) return false;
+    if(ca&&r.category!==ca) return false;
+    if(st&&r.status!==st) return false;
+    if(tc&&r.tcs!==tc) return false;
+    if(gs&&(r.client+r.project+r.contract).toLowerCase().indexOf(gs)===-1) return false;
+    return true;
+  });
+}
+function onGlobalSearch() {
+  GLOBAL_SEARCH=document.getElementById('global-search').value||'';
+  if(CURRENT_MODULE==='BD') refreshAll(); else refreshREC();
+}
+function resetFilters() {
+  ['fl-project','fl-cat','fl-status','fl-tcs'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('global-search').value='';
+  GLOBAL_SEARCH=''; CONTRACT_EXPIRY_FILTER=null; CUST_GROUP=null; CUST_CLIENT=null; QTR_FILTER='all';
+  refreshAll();
+}
+
+function buildRECFilters() {
+  var uniq = key => [...new Set(REC_ALL.map(r => r[key]).filter(Boolean))].sort();
+  fillSel('rec-fl-month', uniq('month'));
+  fillSel('rec-fl-client', uniq('client'));
+  fillSel('rec-fl-provnew', uniq('provNew'));
+  fillSel('rec-fl-status', uniq('orderStatus'));
+  fillSel('rec-fl-level', uniq('level'));
+}
+function fillSel(id, arr) {
+  var el = document.getElementById(id); if(!el) return;
+  var first = el.options[0].outerHTML;
+  el.innerHTML = first + arr.map(v => `<option value="${v}">${v}</option>`).join('');
+}
+function resetRECFilters() {
+  ['rec-fl-month','rec-fl-client','rec-fl-provnew','rec-fl-status','rec-fl-level'].forEach(id => document.getElementById(id).value='');
+  refreshREC();
+}
+
+// REFRESH FUNCTIONS
+function refreshAll() {
+  if(!ALL.length) return;
+  FILTERED=getFiltered();
+  document.getElementById('fl-count').textContent=FILTERED.length+' / '+ALL.length;
+  renderKPIs();
+  renderCharts();
+  renderQtrTables();
+  renderContractTab();
+  renderCustTab();
+  renderTCTab();
+}
+
+function refreshREC() {
+  var month = document.getElementById('rec-fl-month').value;
+  var client = document.getElementById('rec-fl-client').value;
+  var prov = document.getElementById('rec-fl-provnew').value;
+  var status = document.getElementById('rec-fl-status').value;
+  var level = document.getElementById('rec-fl-level').value;
+  var gs = GLOBAL_SEARCH.toLowerCase();
+
+  REC_FILTERED = REC_ALL.filter(r => {
+    if(month && r.month !== month) return false;
+    if(client && r.client !== client) return false;
+    if(prov && r.provNew !== prov) return false;
+    if(status && r.orderStatus !== status) return false;
+    if(level && r.level !== level) return false;
+    if(gs && (r.client + r.position + r.codeOrder + r.issue).toLowerCase().indexOf(gs) === -1) return false;
+    return true;
+  });
+
+  document.getElementById('rec-fl-count').textContent = REC_FILTERED.length + ' / ' + REC_ALL.length;
+
+  var recorded = REC_FILTERED.length;
+  var openPos = REC_FILTERED.reduce((a,b) => a + b.slOrder, 0);
+  var internalCV = REC_FILTERED.reduce((a,b) => a + b.slCVSent, 0);
+  var clientCV = REC_FILTERED.reduce((a,b) => a + b.cvKHSent, 0);
+  var passPV = REC_FILTERED.reduce((a,b) => a + b.cvPassPV, 0);
+  var warranty = REC_FILTERED.reduce((a,b) => a + b.cvWarranty, 0);
+  var noJoin = REC_FILTERED.reduce((a,b) => a + b.cvNoAccept, 0);
+  var onboard = REC_FILTERED.reduce((a,b) => a + b.cvOnboard, 0);
+  var rateOnboard = internalCV ? Math.round((onboard / internalCV) * 100) : 0;
+
+  document.getElementById('rec-m-recorded').textContent = recorded;
+  document.getElementById('rec-m-open').textContent = openPos;
+  document.getElementById('rec-m-internal').textContent = internalCV;
+  document.getElementById('rec-m-rate').textContent = rateOnboard + '%';
+
+  document.getElementById('rec-c-orders').textContent = recorded;
+  document.getElementById('rec-c-cv').textContent = internalCV;
+  document.getElementById('rec-c-client').textContent = clientCV;
+  document.getElementById('rec-c-pass').textContent = passPV;
+  document.getElementById('rec-c-warranty').textContent = warranty;
+  document.getElementById('rec-c-nojoin').textContent = noJoin;
+  document.getElementById('rec-c-onboard').textContent = onboard;
+
+  renderRECOverviewCharts(internalCV, clientCV);
+  renderRECTable();
+  renderRECIssues();
+}
+
+function renderRECOverviewCharts(internal, clientCV) {
+  var total = internal + clientCV;
+  var intPct = total ? Math.round((internal / total) * 100) : 0;
+  var cliPct = total ? (100 - intPct) : 0;
+
+  document.getElementById('rec-src-int-val').textContent = internal + ' CV (' + intPct + '%)';
+  document.getElementById('rec-src-cli-val').textContent = clientCV + ' CV (' + cliPct + '%)';
+  document.getElementById('rec-src-int-bar').style.width = intPct + '%';
+  document.getElementById('rec-src-cli-bar').style.width = cliPct + '%';
+
+  var provMap = {};
+  REC_FILTERED.forEach(r => {
+    var p = r.provNew || 'Chưa cập nhật';
+    provMap[p] = (provMap[p] || 0) + r.slOrder;
+  });
+  var sortedProvs = Object.entries(provMap).sort((a,b) => b[1] - a[1]);
+  var maxProv = sortedProvs.length ? sortedProvs[0][1] : 1;
+
+  document.getElementById('rec-prov-bars').innerHTML = sortedProvs.map(([p, val]) => `
+    <div class="bar-item">
+      <div class="bar-row"><span>${p}</span><b class="mono">${val} vị trí</b></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(val/maxProv*100)}%;background:var(--accent2)"></div></div>
+    </div>
+  `).join('') || '<div style="color:var(--text3)">Không có dữ liệu</div>';
+
+  var posMap = {};
+  REC_FILTERED.forEach(r => {
+    var pos = r.position || 'Chưa cập nhật';
+    posMap[pos] = (posMap[pos] || 0) + r.slOrder;
+  });
+  var sortedPos = Object.entries(posMap).sort((a,b) => b[1] - a[1]);
+
+  document.getElementById('rec-pos-list').innerHTML = sortedPos.map(([pos, val]) => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--surface);border-radius:var(--rs);margin-bottom:6px">
+      <span style="font-weight:600">${pos}</span>
+      <span class="badge b-blue">${val} vị trí</span>
+    </div>
+  `).join('') || '<div style="color:var(--text3)">Không có dữ liệu</div>';
+
+  var urgent = REC_FILTERED.filter(r => r.level.includes('Nghiêm trọng'));
+  document.getElementById('rec-urgent-badge').textContent = urgent.length + ' nghiêm trọng';
+  document.getElementById('rec-urgent-list').innerHTML = urgent.map(r => `
+    <div style="padding:8px 10px;border-bottom:1px solid var(--border)">
+      <div style="display:flex;justify-content:space-between;font-weight:700">
+        <span style="color:var(--accent)">${r.codeOrder}</span>
+        <span style="color:var(--text3);font-size:10px">${r.dateReceived}</span>
+      </div>
+      <div style="font-size:11px;color:var(--text2);margin-top:2px">${r.position} · ${r.provNew}</div>
+      <div style="color:var(--red);font-weight:600;font-size:11px;margin-top:2px">${r.orderStatus} · ${r.slOrder} vị trí</div>
+    </div>
+  `).join('') || '<div style="color:var(--text3);padding:10px">Không có order nghiêm trọng</div>';
+}
+
+function renderRECTable() {
+  document.getElementById('rec-tbl-badge').textContent = REC_FILTERED.length;
+  document.getElementById('rec-tbl-body').innerHTML = REC_FILTERED.map(r => {
+    var lvlChip = r.level.includes('Nghiêm trọng') ? '<span class="chip c-dtm">Nghiêm trọng</span>' :
+                  r.level.includes('Trung bình') ? '<span class="chip c-dnm">Trung bình</span>' :
+                  '<span class="chip c-working">Tốt / Bình thường</span>';
+    return `
+      <tr>
+        <td style="font-weight:700;color:var(--accent)">${r.codeOrder}</td>
+        <td>
+          <div style="font-weight:600">${r.client}</div>
+          <div style="font-size:11px;color:var(--text3)">${r.position}</div>
+        </td>
+        <td>${r.provNew}</td>
+        <td>${r.picRC}</td>
+        <td class="mono" style="text-align:center;font-weight:700">${r.slOrder}</td>
+        <td class="mono" style="text-align:center">${r.slCVSent}</td>
+        <td class="mono">${r.dateReceived}</td>
+        <td><span class="chip c-annex">${r.orderStatus}</span></td>
+        <td>${lvlChip}</td>
+        <td style="font-size:11px;color:var(--text2);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.note}">${r.note || '—'}</td>
+      </tr>
+    `;
+  }).join('') || '<tr><td colspan="10" style="text-align:center;padding:20px">Không tìm thấy dữ liệu phù hợp</td></tr>';
+}
+
+// LỌC CHÍNH XÁC CÁC SỰ CỐ THỰC TẾ TRONG TAB 2 (BỎ DÒNG MẪU)
+function renderRECIssues() {
+  var filter = document.getElementById('rec-issue-filter').value;
+  var issues = REC_FILTERED.filter(r => {
+    if (!r.issue) return false;
+    var issueStr = r.issue.trim();
+    if (issueStr === '' || issueStr.includes('Nhập tay') || issueStr.includes('Vấn Đề Phát Sinh')) return false;
+    if (filter && !r.resolved.includes(filter)) return false;
+    return true;
+  });
+
+  document.getElementById('rec-issue-list').innerHTML = issues.map(r => `
+    <div style="background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:14px;box-shadow:var(--sh)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div style="display:flex;gap:8px;align-items:center">
+          <span class="badge b-blue">${r.codeOrder}</span>
+          <span style="font-weight:700">${r.client}</span>
+          <span style="color:var(--text3)">· ${r.position} (${r.provNew})</span>
+        </div>
+        <span class="chip c-pending">${r.resolved}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:2fr 1fr 2fr;gap:12px;font-size:12px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+        <div><b style="color:var(--red)">Vấn đề phát sinh:</b><br>${r.issue}</div>
+        <div><b>Ngày ghi nhận:</b> ${r.loggedDate}<br><b>Ngày nhận:</b> ${r.dateReceived}</div>
+        <div><b style="color:var(--accent2)">Đề xuất bởi RC:</b><br>${r.proposalRC}</div>
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-top:8px"><b>PIC:</b> ${r.picRC} | <b>Ghi chú:</b> ${r.note || 'Không có'}</div>
+    </div>
+  `).join('') || '<div style="color:var(--text3);padding:20px;text-align:center">Không có trường hợp phát sinh nào</div>';
+}
+
+// BD KPIS & CHARTS RENDERING
+function uniqC(arr){var s=new Set();arr.forEach(function(r){s.add(r.client);});return s.size;}
+function renderKPIs() {
+  var d=FILTERED;
+  var active=['Take-care','Gia hạn'];
+  var cats=['Service Contract','Annex (Extending)'];
+  document.getElementById('k1').textContent=uniqC(d.filter(function(r){return r.status==='Working'&&cats.indexOf(r.category)!==-1&&active.indexOf(r.action)!==-1;}));
+  document.getElementById('k2').textContent=uniqC(d.filter(function(r){return r.status==='Working'&&cats.indexOf(r.category)!==-1&&r.action==='Take-care'&&r.expired==='Indefinite';}));
+  document.getElementById('k3').textContent=uniqC(d.filter(function(r){return r.status==='Working'&&r.category==='Service Contract'&&active.indexOf(r.action)!==-1;}));
+  document.getElementById('k4').textContent=uniqC(d.filter(function(r){return r.status==='Working'&&r.category==='Annex (Extending)'&&active.indexOf(r.action)!==-1;}));
+  var expBase=d.filter(function(r){return cats.indexOf(r.category)!==-1;});
+  var e30=expBase.filter(function(r){return r.days!==null&&r.days>=0&&r.days<=30;}).length;
+  var e60=expBase.filter(function(r){return r.days!==null&&r.days>=0&&r.days<=60;}).length;
+  var e90=expBase.filter(function(r){return r.days!==null&&r.days>=0&&r.days<=90;}).length;
+  document.getElementById('k5').textContent=e90;
+  document.getElementById('k5-30').textContent='30d: '+e30;
+  document.getElementById('k5-60').textContent='60d: '+e60;
+  document.getElementById('k5-90').textContent='90d: '+e90;
+  document.getElementById('k6').textContent=uniqC(d.filter(function(r){return r.status==='Working'&&cats.indexOf(r.category)!==-1&&r.action==='Gia hạn';}));
+}
+
+var COLOR_MAP={'Service Contract':'#2563eb','Annex (Extending)':'#7c3aed','Annex':'#94a3b8','PO':'#059669','Working':'#059669','Stop':'#dc2626','Pending':'#d97706','New':'#2563eb','DUE THIS MONTH':'#dc2626','DUE NEXT MONTH':'#d97706','NORMAL':'#059669'};
+function colorFor(k) { return COLOR_MAP[k]||'#2563eb'; }
+
+function barChart(elId,data,totalId) {
+  var el=document.getElementById(elId); if(!el) return;
+  if(!data.length){el.innerHTML='<div style="color:var(--text3);font-size:11px;padding:8px">Không có dữ liệu</div>';return;}
+  var mx=Math.max.apply(null,data.map(function(d){return d.v;}));
+  if(totalId){var tn=document.getElementById(totalId);if(tn) tn.textContent=data.reduce(function(a,b){return a+b.v;},0);}
+  el.innerHTML=data.map(function(d){
+    var pct=Math.round(d.v/mx*100);
+    return '<div class="bar-item"><div class="bar-row"><span class="bar-lbl" title="'+d.l+'">'+d.l+'</span><span class="bar-val">'+d.v+'</span></div>'+
+      '<div class="bar-track"><div class="bar-fill" style="width:'+pct+'%;background:'+colorFor(d.l)+'"></div></div></div>';
+  }).join('');
+}
+
+function renderCategoryTrend() {
+  var el=document.getElementById('ch-trend'); if(!el) return;
+  var sc_data={}, ext_data={};
+  FILTERED.filter(function(r){return r.status==='Working'&&(r.category==='Service Contract'||r.category==='Annex (Extending)');}).forEach(function(r){
+    var d=parseDate(r.effective); if(!d) return;
+    var yr=d.getFullYear();
+    if(r.category==='Service Contract') sc_data[yr]=(sc_data[yr]||0)+1;
+    else ext_data[yr]=(ext_data[yr]||0)+1;
+  });
+  var selEl = document.getElementById('fl-trend-year');
+  var endYr = selEl && selEl.value ? parseInt(selEl.value) : 2026;
+  var yrs = [endYr - 2, endYr - 1, endYr];
+  var scVals=yrs.map(function(y){return sc_data[y]||0;});
+  var extVals=yrs.map(function(y){return ext_data[y]||0;});
+  var maxV=Math.max.apply(null,scVals.concat(extVals))||1;
+  var W=420, H=160, PAD_L=30, PAD_B=24, PAD_T=16, PAD_R=8;
+  var chartW=W-PAD_L-PAD_R, chartH=H-PAD_T-PAD_B;
+  var groupW=chartW/yrs.length;
+  var barW=Math.min(28, groupW*0.35);
+  var gap=4;
+  var gridLines='', bars='', labels='', xLabels='';
+  for(var gi=1;gi<=4;gi++){
+    var gy=PAD_T+chartH*(1-gi/4);
+    gridLines+='<line x1="'+PAD_L+'" y1="'+gy+'" x2="'+(W-PAD_R)+'" y2="'+gy+'" stroke="#e2e6ee" stroke-width="1" stroke-dasharray="3,3"/>';
+    gridLines+='<text x="'+(PAD_L-3)+'" y="'+(gy+4)+'" font-size="9" fill="#8a93a8" text-anchor="end">'+Math.round(maxV*gi/4)+'</text>';
+  }
+  yrs.forEach(function(yr,i){
+    var cx=PAD_L+groupW*(i+0.5);
+    var scH=Math.max(2,(scVals[i]/maxV)*chartH);
+    var extH=Math.max(2,(extVals[i]/maxV)*chartH);
+    var scX=cx-gap/2-barW, extX=cx+gap/2;
+    var scY=PAD_T+chartH-scH, extY=PAD_T+chartH-extH;
+    bars+='<rect x="'+scX+'" y="'+scY+'" width="'+barW+'" height="'+scH+'" rx="3" fill="#2563eb" opacity="0.85"/>';
+    bars+='<rect x="'+extX+'" y="'+extY+'" width="'+barW+'" height="'+extH+'" rx="3" fill="#7c3aed" opacity="0.85"/>';
+    if(scVals[i]>0) labels+='<text x="'+(scX+barW/2)+'" y="'+(scY-3)+'" font-size="9" fill="#2563eb" text-anchor="middle" font-weight="600">'+scVals[i]+'</text>';
+    if(extVals[i]>0) labels+='<text x="'+(extX+barW/2)+'" y="'+(extY-3)+'" font-size="9" fill="#7c3aed" text-anchor="middle" font-weight="600">'+extVals[i]+'</text>';
+    xLabels+='<text x="'+cx+'" y="'+(H-6)+'" font-size="10" fill="#4b5678" text-anchor="middle" font-weight="600">'+yr+'</text>';
+  });
+  var legend='<g transform="translate('+(PAD_L)+','+(PAD_T-4)+')">'
+    +'<rect x="0" y="-8" width="10" height="8" rx="2" fill="#2563eb" opacity="0.85"/>'
+    +'<text x="14" y="0" font-size="9" fill="#4b5678">Service Contract</text>'
+    +'<rect x="110" y="-8" width="10" height="8" rx="2" fill="#7c3aed" opacity="0.85"/>'
+    +'<text x="124" y="0" font-size="9" fill="#4b5678">Annex (Extending)</text>'
+    +'</g>';
+  el.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;display:block">'
+    +gridLines+bars+labels+xLabels+legend
+    +'<line x1="'+PAD_L+'" y1="'+PAD_T+'" x2="'+PAD_L+'" y2="'+(PAD_T+chartH)+'" stroke="#c8cfdd" stroke-width="1"/>'
+    +'<line x1="'+PAD_L+'" y1="'+(PAD_T+chartH)+'" x2="'+(W-PAD_R)+'" y2="'+(PAD_T+chartH)+'" stroke="#c8cfdd" stroke-width="1"/>'
+    +'</svg>';
+}
+
+function renderCharts() {
+  var CAT_ORDER=['Service Contract','Annex (Extending)','Annex','Amendment'];
+  var catBase=FILTERED.filter(function(r){return r.status==='Working';});
+  var catMap={};
+  catBase.forEach(function(r){var v=r.category||'(trống)';catMap[v]=(catMap[v]||0)+1;});
+  var catD=CAT_ORDER.filter(function(k){return catMap[k]>0;}).map(function(k){return{l:k,v:catMap[k]};});
+  Object.keys(catMap).forEach(function(k){if(CAT_ORDER.indexOf(k)===-1) catD.push({l:k,v:catMap[k]});});
+  barChart('ch-cat',catD,'ch1-n');
+
+  var d=FILTERED.filter(function(r){return r.status==='Working'&&(r.action==='Take-care'||r.action==='Gia hạn');});
+  renderStatusBars();
+  renderProjBars(d);
+
+  var TCS_ORDER=['DUE THIS MONTH','DUE NEXT MONTH','NORMAL'];
+  var tcsMap2={};
+  d.filter(function(r){return r.tcs&&r.tcs!=='#NUM!';}).forEach(function(r){tcsMap2[r.tcs]=(tcsMap2[r.tcs]||0)+1;});
+  var tcsD=TCS_ORDER.filter(function(k){return tcsMap2[k]>0;}).map(function(k){return{l:k,v:tcsMap2[k]};});
+  barChart('ch-tcs',tcsD,'ch3-n');
+  renderCategoryTrend();
+}
+
+function setQtr(q,btn) {
+  QTR_FILTER=q;
+  document.querySelectorAll('.qtr-btn').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  renderQtrTables();
+}
+function onQtrYearChange() {
+  var selYr = document.getElementById('fl-qtr-year').value;
+  var lbl = document.getElementById('qtr-title-lbl'); if(lbl) lbl.textContent = 'Khách hàng mới theo Quý ' + selYr;
+  renderQtrTables();
+}
+function renderQtrTables() {
+  var search=((document.getElementById('qtr-search')||{}).value||'').toLowerCase();
+  var qtrYrSel = document.getElementById('fl-qtr-year');
+  var targetYr = qtrYrSel && qtrYrSel.value ? parseInt(qtrYrSel.value) : 2026;
+  var base=FILTERED.filter(function(r){return r.status==='Working'&&(r.category==='Service Contract'||r.category==='Annex (Extending)');});
+  var newRows=base.filter(function(r){var d=parseDate(r.effective);return d&&d.getFullYear()===targetYr;});
+  var filtered=newRows.filter(function(r){
+    if(search&&(r.client+r.project+r.contract).toLowerCase().indexOf(search)===-1) return false;
+    if(QTR_FILTER==='all') return true;
+    var d=parseDate(r.effective); return d&&getQuarter(d)===QTR_FILTER;
+  });
+  filtered.sort(function(a,b){var da=parseDate(a.effective),db=parseDate(b.effective);return (da&&db)?(da-db):0;});
+  QTR_DATA=filtered;
+  document.getElementById('qtr-total-badge').textContent=filtered.length;
+  if(!filtered.length) { document.getElementById('qtr-content').innerHTML='<div style="text-align:center;color:var(--text3);padding:20px;font-size:12px">Không có dữ liệu năm '+targetYr+'</div>'; return; }
+
+  var groups={Q1:[],Q2:[],Q3:[],Q4:[]};
+  filtered.forEach(function(r){var d=parseDate(r.effective);if(d) groups[getQuarter(d)].push(r);});
+  var show=QTR_FILTER==='all'?['Q1','Q2','Q3','Q4']:[QTR_FILTER];
+  var qColors={Q1:'var(--accent)',Q2:'var(--accent2)',Q3:'var(--amber)',Q4:'var(--purple)'};
+
+  document.getElementById('qtr-content').innerHTML=show.map(function(q){
+    var rows=groups[q];
+    if(!rows.length&&QTR_FILTER!=='all') return '';
+    var scCount=rows.filter(function(r){return r.category==='Service Contract';}).length;
+    var extCount=rows.filter(function(r){return r.category==='Annex (Extending)';}).length;
+    return '<div style="margin-bottom:16px">'
+      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">'
+        +'<span style="font-size:12px;font-weight:700;color:'+qColors[q]+'">'+q+'</span>'
+        +'<span class="badge" style="background:'+qColors[q]+'1a;color:'+qColors[q]+'">'+rows.length+' records</span>'
+        +(scCount?'<span class="badge b-blue">SC: '+scCount+'</span>':'')
+        +(extCount?'<span class="badge b-purple">Ext: '+extCount+'</span>':'')
+      +'</div>'
+      +(rows.length
+        ? '<div class="tbl-wrap" style="max-height:240px"><table>'
+          +'<thead><tr>'
+            +'<th>Status</th><th>Tracking Following</th><th>Client Name</th><th>Project/Items</th>'
+            +'<th>Contract/Annex</th><th>Category</th><th>Effective Day</th><th>Duration Expired</th><th>Quý</th>'
+          +'</tr></thead>'
+          +'<tbody>'+rows.map(function(r){
+            return '<tr>'
+              +'<td>'+statusChip(r.status)+'</td>'
+              +'<td class="mono" style="font-size:10px;color:var(--text3);max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+r.tracking+'</td>'
+              +'<td style="font-weight:600">'+r.client+'</td>'
+              +'<td>'+r.project+'</td>'
+              +'<td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+r.contract+'">'+r.contract+'</td>'
+              +'<td>'+catChip(r.category)+'</td>'
+              +'<td class="mono">'+fmtDate(r.effective)+'</td>'
+              +'<td class="mono">'+fmtDate(r.expired)+'</td>'
+              +'<td><span style="font-weight:700;color:'+qColors[q]+'">'+q+'</span></td>'
+            +'</tr>';
+          }).join('')+'</tbody></table></div>'
+        : '<div style="color:var(--text3);font-size:11px;padding:8px">Không có dữ liệu trong '+q+' ('+targetYr+')</div>')
+      +'</div>';
+  }).join('');
+}
+
+function filterByExpiry(d) {
+  CONTRACT_EXPIRY_FILTER=CONTRACT_EXPIRY_FILTER===d?null:d;
+  ['30','60','90'].forEach(function(n){
+    var el=document.getElementById('card-exp'+n);
+    if(el) el.classList.toggle('active-card',CONTRACT_EXPIRY_FILTER===parseInt(n));
+  });
+  var lbl=document.getElementById('c-tbl-lbl');
+  if(lbl) lbl.textContent=CONTRACT_EXPIRY_FILTER?('Hết hạn ≤ '+CONTRACT_EXPIRY_FILTER+' ngày'):'Service Contract & Annex (Extending)';
+  PAGES.contract=1; renderContractTable();
+  var el=document.getElementById('c-body'); if(el) el.closest('.sc').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function renderContractTab() {
+  var base=FILTERED.filter(function(r){return r.category==='Service Contract'||r.category==='Annex (Extending)';});
+  document.getElementById('c-exp30').textContent=base.filter(function(r){return r.days!==null&&r.days>=0&&r.days<=30;}).length;
+  document.getElementById('c-exp60').textContent=base.filter(function(r){return r.days!==null&&r.days>=0&&r.days<=60;}).length;
+  document.getElementById('c-exp90').textContent=base.filter(function(r){return r.days!==null&&r.days>=0&&r.days<=90;}).length;
+  CONTRACT_DATA=base; PAGES.contract=1; renderContractTable();
+}
+
+function renderContractTable() {
+  var search=(document.getElementById('c-search').value||'').toLowerCase();
+  var cat=document.getElementById('c-fl-cat').value;
+  var rows=CONTRACT_DATA.filter(function(r){
+    if(CONTRACT_EXPIRY_FILTER!==null&&(r.days===null||r.days<0||r.days>CONTRACT_EXPIRY_FILTER)) return false;
+    if(cat&&r.category!==cat) return false;
+    return !search||(r.client+r.project+r.contract).toLowerCase().indexOf(search)!==-1;
+  });
+  var s=SORTS.contract;
+  rows.sort(function(a,b){
+    if(s.col==='days'){var va=a.days===null?999999:a.days,vb=b.days===null?999999:b.days;return(va-vb)*s.dir;}
+    var da=parseDate(a[s.col]),db=parseDate(b[s.col]); if(da&&db) return (da-db)*s.dir;
+    return String(a[s.col]||'').localeCompare(String(b[s.col]||''))*s.dir;
+  });
+  document.getElementById('c-badge').textContent=rows.length;
+  renderPaged('contract',rows,'c-body','c-page','c-rows','c-prev','c-next',function(r){
+    var dc=r.days===null?'':r.days<0?'days-neg':r.days<=30?'days-urgent':r.days<=60?'days-warn':r.days<=90?'days-ok':'';
+    return '<tr>'
+      +'<td style="font-weight:600">'+r.client+'</td>'
+      +'<td>'+r.project+'</td>'
+      +'<td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+r.contract+'">'+r.contract+'</td>'
+      +'<td>'+catChip(r.category)+'</td>'
+      +'<td class="mono">'+fmtDate(r.effective)+'</td>'
+      +'<td class="mono">'+fmtDate(r.expired)+'</td>'
+      +'<td class="mono '+dc+'">'+(r.days!==null?r.days+'d':'—')+'</td>'
+      +'<td>'+actionChip(r.action)+'</td>'
+      +'<td>'+statusChip(r.status)+'</td>'
+    +'</tr>';
+  });
+}
+
+function buildLoyalty(data) {
+  var map={};
+  data.filter(function(r){return r.status==='Working'&&(r.category==='Service Contract'||r.category==='Annex (Extending)');})
+    .forEach(function(r){
+      if(!map[r.client]) map[r.client]={sc:0,ext:0,effDates:[],expDates:[],indef:false};
+      var c=map[r.client];
+      if(r.category==='Service Contract') c.sc++; else c.ext++;
+      var ed=parseDate(r.effective); if(ed) c.effDates.push(ed.getTime());
+      if(r.expired==='Indefinite') c.indef=true;
+      else {var xd=parseDate(r.expired);if(xd) c.expDates.push(xd.getTime());}
+    });
+  return Object.keys(map).map(function(name){
+    var c=map[name];
+    var fromMs=c.effDates.length?Math.min.apply(null,c.effDates):null;
+    var toMs,toLabel;
+    if(c.indef){toMs=TODAY_MS;toLabel='Indefinite';}
+    else if(c.expDates.length){toMs=Math.max.apply(null,c.expDates);toLabel=new Date(toMs).getFullYear();}
+    else{toMs=TODAY_MS;toLabel='—';}
+    var years=fromMs?Math.round((toMs-fromMs)/(365.25*24*3600*1000)*10)/10:0;
+    return {client:name,sc:c.sc,ext:c.ext,from_yr:fromMs?new Date(fromMs).getFullYear():null,to_yr:toLabel,years:years};
+  });
+}
+
+function renderCustTab() {
+  var base=FILTERED.filter(function(r){return r.status==='Working'&&(r.category==='Service Contract'||r.category==='Annex (Extending)');});
+  var wkSet={},rtSet={};
+  base.forEach(function(r){if(r.category==='Service Contract')wkSet[r.client]=1;else rtSet[r.client]=1;});
+  document.getElementById('cust-wk').textContent=Object.keys(wkSet).length;
+  document.getElementById('cust-rt').textContent=Object.keys(rtSet).length;
+  CUST_DATA=base;
+  LOYALTY_DATA=buildLoyalty(FILTERED);
+  LOYALTY_DATA.sort(function(a,b){return b.years-a.years;});
+  PAGES.loyalty=1; renderLoyaltyTable();
+  PAGES.customer=1; renderCustTable();
+}
+
+function filterCustBy(group) {
+  CUST_GROUP=CUST_GROUP===group?null:group;
+  CUST_CLIENT=null;
+  var cb=document.getElementById('cust-clear-btn'); if(cb) cb.style.display='none';
+  var cw=document.getElementById('card-working'),cr=document.getElementById('card-returning');
+  if(cw) cw.style.outline=CUST_GROUP==='working'?'2px solid var(--accent2)':'';
+  if(cr) cr.style.outline=CUST_GROUP==='returning'?'2px solid var(--purple)':'';
+  var cat=document.getElementById('cust-fl-cat');
+  if(cat) cat.value=CUST_GROUP==='working'?'Service Contract':CUST_GROUP==='returning'?'Annex (Extending)':'';
+  var lbl=document.getElementById('cust-tbl-lbl');
+  if(lbl) lbl.textContent=CUST_GROUP==='working'?'Working Customers (SC)':CUST_GROUP==='returning'?'Returning Customers (Ext)':'Working Customers';
+  PAGES.customer=1; renderCustTable();
+  var el=document.getElementById('cust-body'); if(el) el.closest('.sc').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function clickLoyaltyRow(client) {
+  CUST_CLIENT=CUST_CLIENT===client?null:client;
+  var cb=document.getElementById('cust-clear-btn'); if(cb) cb.style.display=CUST_CLIENT?'flex':'none';
+  var lbl=document.getElementById('cust-tbl-lbl'); if(lbl) lbl.textContent=CUST_CLIENT||'Working Customers';
+  PAGES.customer=1; renderLoyaltyTable(); renderCustTable();
+  if(CUST_CLIENT){var el=document.getElementById('cust-body');if(el) el.closest('.sc').scrollIntoView({behavior:'smooth',block:'start'});}
+}
+
+function clearCustFilter() {
+  CUST_CLIENT=null; CUST_GROUP=null;
+  var cb=document.getElementById('cust-clear-btn'); if(cb) cb.style.display='none';
+  var cat=document.getElementById('cust-fl-cat'); if(cat) cat.value='';
+  var ac=document.getElementById('cust-fl-action'); if(ac) ac.value='';
+  var yr=document.getElementById('cust-fl-years'); if(yr) yr.value='';
+  var cw=document.getElementById('card-working'),cr=document.getElementById('card-returning');
+  if(cw) cw.style.outline=''; if(cr) cr.style.outline='';
+  var lbl=document.getElementById('cust-tbl-lbl'); if(lbl) lbl.textContent='Working Customers';
+  PAGES.customer=1; renderLoyaltyTable(); renderCustTable();
+}
+
+function sortLoy(col) {
+  if(LOY_SORT.col===col) LOY_SORT.dir*=-1; else {LOY_SORT.col=col;LOY_SORT.dir=col==='client'?1:-1;}
+  PAGES.loyalty=1; renderLoyaltyTable();
+}
+
+function renderLoyaltyTable() {
+  var search=((document.getElementById('loyalty-search')||{}).value||'').toLowerCase();
+  var rows=LOYALTY_DATA.filter(function(r){return !search||r.client.toLowerCase().indexOf(search)!==-1;});
+  var s=LOY_SORT;
+  rows.sort(function(a,b){
+    if(s.col==='client') return a.client.localeCompare(b.client)*s.dir;
+    var va=a[s.col]==='Indefinite'?9999:(+a[s.col]||0);
+    var vb=b[s.col]==='Indefinite'?9999:(+b[s.col]||0);
+    return (va-vb)*s.dir;
+  });
+  document.getElementById('loyalty-badge').textContent=rows.length;
+  var total=rows.length,tp=Math.max(1,Math.ceil(total/PAGE_SIZE));
+  if(PAGES.loyalty>tp) PAGES.loyalty=tp;
+  var slice=rows.slice((PAGES.loyalty-1)*PAGE_SIZE,PAGES.loyalty*PAGE_SIZE);
+  document.getElementById('loyalty-body').innerHTML=slice.map(function(r){
+    var isAct=CUST_CLIENT===r.client;
+    var yc=r.years>=10?'color:var(--accent2);font-weight:700':r.years>=5?'color:var(--accent);font-weight:600':'color:var(--text2)';
+    var toD=r.to_yr==='Indefinite'?'<span style="color:var(--purple)">Indef</span>':r.to_yr;
+    return '<tr class="loy-row'+(isAct?' active-cl':'')+'" onclick="clickLoyaltyRow(\''+r.client.replace(/\\/g,'\\\\').replace(/'/g,"\\'")+'\')">'+
+      '<td style="font-weight:600">'+r.client+'</td>'+
+      '<td style="text-align:center"><span class="chip c-sc">'+r.sc+'</span></td>'+
+      '<td style="text-align:center"><span class="chip c-ext">'+r.ext+'</span></td>'+
+      '<td style="text-align:center;color:var(--text3)">'+(r.from_yr||'—')+'</td>'+
+      '<td style="text-align:center">'+toD+'</td>'+
+      '<td style="text-align:center;'+yc+'">'+r.years+'y</td>'+
+    '</tr>';
+  }).join('')||'<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:16px">Không có dữ liệu</td></tr>';
+  document.getElementById('loy-page').textContent=PAGES.loyalty+'/'+tp;
+  document.getElementById('loy-rows').textContent=total+' clients';
+  document.getElementById('loy-prev').disabled=PAGES.loyalty<=1;
+  document.getElementById('loy-next').disabled=PAGES.loyalty>=tp;
+}
+
+function renderCustTable() {
+  var search=(document.getElementById('cust-search').value||'').toLowerCase();
+  var cat=document.getElementById('cust-fl-cat').value;
+  var action=(document.getElementById('cust-fl-action')||{}).value||'';
+  var yearsF=(document.getElementById('cust-fl-years')||{}).value||'';
+  var rows=CUST_DATA.filter(function(r){
+    if(CUST_CLIENT&&r.client!==CUST_CLIENT) return false;
+    if(cat&&r.category!==cat) return false;
+    if(action&&r.action!==action) return false;
+    if(yearsF){
+      var ed=parseDate(r.effective);
+      var xd=r.expired==='Indefinite'?TODAY:parseDate(r.expired);
+      var yrs=(ed&&xd)?((xd-ed)/(365.25*24*3600*1000)):null;
+      if(yrs===null) return false;
+      if(yearsF==='lt1'&&yrs>=1) return false;
+      if(yearsF==='1to3'&&(yrs<1||yrs>=3)) return false;
+      if(yearsF==='3to5'&&(yrs<3||yrs>=5)) return false;
+      if(yearsF==='gt5'&&yrs<5) return false;
+    }
+    return !search||(r.client+r.project+r.contract).toLowerCase().indexOf(search)!==-1;
+  });
+  var s=SORTS.customer;
+  rows.sort(function(a,b){
+    var da=parseDate(a[s.col]),db=parseDate(b[s.col]); if(da&&db) return (da-db)*s.dir;
+    return String(a[s.col]||'').localeCompare(String(b[s.col]||''))*s.dir;
+  });
+  document.getElementById('cust-badge').textContent=rows.length;
+  renderPaged('customer',rows,'cust-body','cust-page','cust-rows','cust-prev','cust-next',function(r){
+    var ed=parseDate(r.effective);
+    var xd=r.expired==='Indefinite'?TODAY:parseDate(r.expired);
+    var yrs=(ed&&xd)?Math.round((xd-ed)/(365.25*24*3600*1000)*10)/10:null;
+    var yrsStyle=yrs===null?'color:var(--text3)':yrs>=5?'color:var(--accent2);font-weight:700':yrs>=3?'color:var(--accent);font-weight:600':'color:var(--text2)';
+    var yrsLbl=yrs===null?'—':yrs+'y';
+    return '<tr>'
+      +'<td style="font-weight:600">'+r.client+'</td>'
+      +'<td>'+catChip(r.category)+'</td>'
+      +'<td>'+r.project+'</td>'
+      +'<td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+r.contract+'">'+r.contract+'</td>'
+      +'<td>'+actionChip(r.action)+'</td>'
+      +'<td class="mono">'+fmtDate(r.effective)+'</td>'
+      +'<td class="mono">'+(r.expired==='Indefinite'?'<span style="color:var(--purple)">Indefinite</span>':fmtDate(r.expired))+'</td>'
+      +'<td class="mono" style="text-align:center;'+yrsStyle+'">'+yrsLbl+'</td>'
+      +'<td>'+tcsChip(r.tcs)+'</td>'
+    +'</tr>';
+  });
+}
+
+function renderTCTab() {
+  var scope=FILTERED.filter(function(r){
+    return (r.category==='Service Contract'||r.category==='Annex (Extending)')&&(r.action==='Take-care'||r.action==='Gia hạn');
+  });
+  var map={};
+  scope.forEach(function(r){
+    var ex=map[r.client],p=TC_PRI[r.tcs]!==undefined?TC_PRI[r.tcs]:99;
+    if(!ex||(TC_PRI[ex.tcs]!==undefined?TC_PRI[ex.tcs]:99)>p) map[r.client]=r;
+  });
+  TC_DATA=Object.values(map);
+  document.getElementById('tc-dtm').textContent=TC_DATA.filter(function(r){return r.tcs==='DUE THIS MONTH';}).length;
+  document.getElementById('tc-dnm').textContent=TC_DATA.filter(function(r){return r.tcs==='DUE NEXT MONTH';}).length;
+  document.getElementById('tc-norm').textContent=TC_DATA.filter(function(r){return r.tcs==='NORMAL';}).length;
+  PAGES.tc=1; renderTCTable();
+}
+
+function renderTCTable() {
+  var search=(document.getElementById('tc-search').value||'').toLowerCase();
+  var tcsF=document.getElementById('tc-fl').value;
+  var rows=TC_DATA.filter(function(r){
+    if(tcsF&&r.tcs!==tcsF) return false;
+    return !search||(r.client+r.project).toLowerCase().indexOf(search)!==-1;
+  });
+  var s=SORTS.tc;
+  rows.sort(function(a,b){
+    if(s.col==='tcs'){var pa=TC_PRI[a.tcs]!==undefined?TC_PRI[a.tcs]:99,pb=TC_PRI[b.tcs]!==undefined?TC_PRI[b.tcs]:99;return(pa-pb)*s.dir;}
+    var da=parseDate(a[s.col]),db=parseDate(b[s.col]); if(da&&db) return (da-db)*s.dir;
+    return String(a[s.col]||'').localeCompare(String(b[s.col]||''))*s.dir;
+  });
+  document.getElementById('tc-badge').textContent=rows.length;
+  renderPaged('tc',rows,'tc-body','tc-page','tc-rows','tc-prev','tc-next',function(r){
+    return '<tr>'
+      +'<td style="font-weight:600">'+r.client+'</td>'
+      +'<td>'+catChip(r.category)+'</td>'
+      +'<td>'+r.project+'</td>'
+      +'<td>'+tcsChip(r.tcs)+'</td>'
+      +'<td class="mono" style="color:var(--text2)">'+fmtDate(r.lastTC)+'</td>'
+      +'<td class="mono" style="color:var(--accent)">'+fmtDate(r.nextTC)+'</td>'
+      +'<td>'+actionChip(r.action)+'</td>'
+    +'</tr>';
+  });
+}
+
+function renderPaged(key,rows,bodyId,pageId,rowsId,prevId,nextId,rowFn) {
+  var total=rows.length,tp=Math.max(1,Math.ceil(total/PAGE_SIZE));
+  if(PAGES[key]>tp) PAGES[key]=tp;
+  var start=(PAGES[key]-1)*PAGE_SIZE;
+  document.getElementById(bodyId).innerHTML=rows.slice(start,start+PAGE_SIZE).map(rowFn).join('')
+    ||'<tr><td colspan="12" style="text-align:center;color:var(--text3);padding:20px">Không có dữ liệu</td></tr>';
+  document.getElementById(pageId).textContent=PAGES[key]+'/'+tp;
+  document.getElementById(rowsId).textContent=total+' dòng';
+  document.getElementById(prevId).disabled=PAGES[key]<=1;
+  document.getElementById(nextId).disabled=PAGES[key]>=tp;
+}
+
+function pg(key,dir) {
+  if(key==='loyalty'){PAGES.loyalty=(PAGES.loyalty||1)+dir;renderLoyaltyTable();return;}
+  if(key==='pcp'){PAGES.pcp=(PAGES.pcp||1)+dir;renderProjClientTable();return;}
+  if(key==='scp'){PAGES.scp=(PAGES.scp||1)+dir;renderStatusClientTable();return;}
+  PAGES[key]=(PAGES[key]||1)+dir;
+  if(key==='contract') renderContractTable();
+  else if(key==='customer') renderCustTable();
+  else if(key==='tc') renderTCTable();
+}
+
+function sortTbl(key,col) {
+  var s=SORTS[key];
+  if(s.col===col) s.dir*=-1; else {s.col=col;s.dir=1;}
+  PAGES[key]=1;
+  if(key==='contract') renderContractTable();
+  else if(key==='customer') renderCustTable();
+  else if(key==='tc') renderTCTable();
+}
+
+function statusChip(s){return '<span class="chip '+(statusMap[s]||'c-stop')+'">'+s+'</span>';}
+function catChip(c){return '<span class="chip '+(catMap[c]||'c-annex')+'">'+c+'</span>';}
+function tcsChip(t){return '<span class="chip '+(tcsMap[t]||'c-stop')+'">'+t+'</span>';}
+function actionChip(a){return '<span class="chip '+(actionMap[a]||'c-stop')+'">'+a+'</span>';}
+
+var statusMap={Working:'c-working',Stop:'c-stop',Pending:'c-pending',New:'c-new'};
+var catMap={'Service Contract':'c-sc','Annex (Extending)':'c-ext','Annex':'c-annex'};
+var tcsMap={'DUE THIS MONTH':'c-dtm','DUE NEXT MONTH':'c-dnm','NORMAL':'c-normal'};
+var actionMap={'Take-care':'c-takec','Gia hạn':'c-giah','Hết hiệu lực':'c-het'};
+
+function exportExcel(type) {
+  var headers,rows;
+  if(type==='contract'){
+    headers=['Client','Project','Contract/Annex','Category','Effective Day','Duration Expired','Số ngày','Next Action','Status'];
+    rows=CONTRACT_DATA.map(function(r){return[r.client,r.project,r.contract,r.category,fmtDate(r.effective),fmtDate(r.expired),r.days,r.action,r.status];});
+  } else if(type==='customer'){
+    headers=['Client','Category','Project','Contract/Annex','Next Action','Effective Day','Duration Expired','TC Status'];
+    rows=CUST_DATA.map(function(r){return[r.client,r.category,r.project,r.contract,r.action,fmtDate(r.effective),fmtDate(r.expired),r.tcs];});
+  } else if(type==='takecare'){
+    headers=['Client','Category','Project','TC Status','Last TC','Next TC','Next Action'];
+    rows=TC_DATA.map(function(r){return[r.client,r.category,r.project,r.tcs,fmtDate(r.lastTC),fmtDate(r.nextTC),r.action];});
+  } else if(type==='qtr'){
+    headers=['Status','Tracking','Client','Project','Contract/Annex','Category','Effective Day','Duration Expired','Quý'];
+    rows=QTR_DATA.map(function(r){var d=parseDate(r.effective);return[r.status,r.tracking,r.client,r.project,r.contract,r.category,fmtDate(r.effective),fmtDate(r.expired),d?getQuarter(d):''];});
+  }
+  var ws=XLSX.utils.aoa_to_sheet([headers].concat(rows));
+  var wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Export');
+  XLSX.writeFile(wb,'BD_'+type+'_'+new Date().toISOString().slice(0,10)+'.xlsx');
+  toast('Xuất Excel thành công!','success');
+}
+
+function exportRECExcel() {
+  var ws=XLSX.utils.json_to_sheet(REC_FILTERED);
+  var wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'REC_Export');
+  XLSX.writeFile(wb,'REC_Dashboard_'+new Date().toISOString().slice(0,10)+'.xlsx');
+  toast('Xuất Excel REC thành công!','success');
+}
+
+var PROJ_SELECTED='', PROJ_CLIENT_DATA=[];
+function renderProjBars(baseData) {
+  var el=document.getElementById('ch-proj'); if(!el) return;
+  var projMap={};
+  baseData.forEach(function(r){
+    var proj=r.project||'(trống)';
+    if(!projMap[proj]) projMap[proj]={};
+    var expD=parseDate(r.expired);
+    var expMs=expD?expD.getTime():(r.expired==='Indefinite'?Infinity:0);
+    if(!projMap[proj][r.client]||expMs>projMap[proj][r.client]) projMap[proj][r.client]=expMs;
+  });
+  var data=Object.keys(projMap).map(function(p){return{l:p,v:Object.keys(projMap[p]).length};})
+    .sort(function(a,b){return b.v-a.v;}).slice(0,8);
+  var tn=document.getElementById('ch2-n'); if(tn) tn.textContent=data.reduce(function(a,b){return a+b.v;},0);
+  if(!data.length){el.innerHTML='<div style="color:var(--text3);font-size:11px;padding:8px">Không có dữ liệu</div>';return;}
+  var mx=Math.max.apply(null,data.map(function(d){return d.v;}));
+  el.innerHTML=data.map(function(d){
+    var pct=Math.round(d.v/mx*100);
+    var isAct=PROJ_SELECTED===d.l;
+    return '<div class="bar-item" style="cursor:pointer" onclick="clickProjBar(\''+d.l.replace(/'/g,"\\'")+'\')">'
+      +'<div class="bar-row"><span class="bar-lbl" title="'+d.l+'" style="'+(isAct?'color:var(--accent);font-weight:700':'')+'">'+d.l+'</span>'
+      +'<span class="bar-val">'+d.v+'</span></div>'
+      +'<div class="bar-track"><div class="bar-fill" style="width:'+pct+'%;background:'+(isAct?'var(--accent)':colorFor(d.l))+'"></div></div>'
+      +'</div>';
+  }).join('');
+}
+
+function buildUniqClientsByProject(project) {
+  var rows=FILTERED.filter(function(r){return r.status==='Working'&&r.project===project&&(r.action==='Take-care'||r.action==='Gia hạn');});
+  var map={};
+  rows.forEach(function(r){
+    var expD=parseDate(r.expired);
+    var expMs=expD?expD.getTime():(r.expired==='Indefinite'?Infinity:0);
+    if(!map[r.client]||expMs>(map[r.client]._expMs)) map[r.client]=Object.assign({},r,{_expMs:expMs});
+  });
+  return Object.values(map).sort(function(a,b){return b._expMs-a._expMs;});
+}
+
+function clickProjBar(proj) {
+  if(PROJ_SELECTED===proj){closeProjPanel(); return;}
+  PROJ_SELECTED=proj;
+  PROJ_CLIENT_DATA=buildUniqClientsByProject(proj);
+  document.getElementById('proj-panel-title').textContent=proj;
+  document.getElementById('proj-client-panel').style.display='block';
+  document.getElementById('proj-client-search').value='';
+  PAGES.pcp=1;
+  renderProjClientTable();
+  var d=FILTERED.filter(function(r){return r.status==='Working'&&(r.action==='Take-care'||r.action==='Gia hạn');});
+  renderProjBars(d);
+  document.getElementById('proj-client-panel').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function closeProjPanel() {
+  PROJ_SELECTED='';
+  document.getElementById('proj-client-panel').style.display='none';
+  var d=FILTERED.filter(function(r){return r.status==='Working'&&(r.action==='Take-care'||r.action==='Gia hạn');});
+  renderProjBars(d);
+}
+
+function renderProjClientTable() {
+  var search=(document.getElementById('proj-client-search').value||'').toLowerCase();
+  var rows=PROJ_CLIENT_DATA.filter(function(r){return !search||(r.client+r.contract).toLowerCase().indexOf(search)!==-1;});
+  document.getElementById('proj-panel-badge').textContent=rows.length;
+  renderPaged('pcp',rows,'proj-client-body','pcp-page','pcp-rows','pcp-prev','pcp-next',function(r){
+    return '<tr>'
+      +'<td style="font-weight:600">'+r.client+'</td>'
+      +'<td>'+catChip(r.category)+'</td>'
+      +'<td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+r.contract+'">'+r.contract+'</td>'
+      +'<td class="mono">'+fmtDate(r.effective)+'</td>'
+      +'<td class="mono">'+(r.expired==='Indefinite'?'<span style="color:var(--purple)">Indefinite</span>':fmtDate(r.expired))+'</td>'
+      +'<td>'+actionChip(r.action)+'</td>'
+      +'<td>'+tcsChip(r.tcs)+'</td>'
+    +'</tr>';
+  });
+}
+
+var STATUS_SELECTED='', STATUS_CLIENT_DATA=[];
+var STATUS_BAR_ORDER=['New','Working','Pending','Stop'];
+
+function renderStatusBars() {
+  var el=document.getElementById('ch-status'); if(!el) return;
+  var m={};
+  FILTERED.forEach(function(r){var v=r.status||'(trống)';m[v]=(m[v]||0)+1;});
+  var ordered=STATUS_BAR_ORDER.filter(function(k){return m[k]>0;}).map(function(k){return{l:k,v:m[k]};});
+  Object.keys(m).forEach(function(k){if(STATUS_BAR_ORDER.indexOf(k)===-1) ordered.push({l:k,v:m[k]});});
+  var tn=document.getElementById('ch4-n'); if(tn) tn.textContent=ordered.reduce(function(a,b){return a+b.v;},0);
+  if(!ordered.length){el.innerHTML='<div style="color:var(--text3);font-size:11px;padding:8px">Không có dữ liệu</div>';return;}
+  var mx=Math.max.apply(null,ordered.map(function(d){return d.v;}));
+  el.innerHTML=ordered.map(function(d){
+    var pct=Math.round(d.v/mx*100);
+    var isAct=STATUS_SELECTED===d.l;
+    return '<div class="bar-item" style="cursor:pointer" onclick="clickStatusBar(\''+d.l.replace(/'/g,"\\'")+'\')">'
+      +'<div class="bar-row"><span class="bar-lbl" style="'+(isAct?'color:var(--accent);font-weight:700':'')+'">'+d.l+'</span>'
+      +'<span class="bar-val">'+d.v+'</span></div>'
+      +'<div class="bar-track"><div class="bar-fill" style="width:'+pct+'%;background:'+(isAct?'var(--accent)':colorFor(d.l))+'"></div></div>'
+      +'</div>';
+  }).join('');
+}
+
+function clickStatusBar(status) {
+  if(STATUS_SELECTED===status){closeStatusPanel();return;}
+  STATUS_SELECTED=status;
+  STATUS_CLIENT_DATA=FILTERED.filter(function(r){return r.status===status;});
+  document.getElementById('status-panel-title').textContent=status;
+  document.getElementById('status-panel-filter-badge').textContent='Status = '+status;
+  document.getElementById('status-client-panel').style.display='block';
+  document.getElementById('status-client-search').value='';
+  PAGES.scp=1;
+  renderStatusClientTable();
+  renderStatusBars();
+  document.getElementById('status-client-panel').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function closeStatusPanel() {
+  STATUS_SELECTED='';
+  document.getElementById('status-client-panel').style.display='none';
+  renderStatusBars();
+}
+
+function renderStatusClientTable() {
+  var search=(document.getElementById('status-client-search').value||'').toLowerCase();
+  var rows=STATUS_CLIENT_DATA.filter(function(r){return !search||(r.client+r.project+r.contract).toLowerCase().indexOf(search)!==-1;});
+  document.getElementById('status-panel-badge').textContent=rows.length;
+  renderPaged('scp',rows,'status-client-body','scp-page','scp-rows','scp-prev','scp-next',function(r){
+    return '<tr>'
+      +'<td style="font-weight:600">'+r.client+'</td>'
+      +'<td>'+catChip(r.category)+'</td>'
+      +'<td>'+r.project+'</td>'
+      +'<td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+r.contract+'">'+r.contract+'</td>'
+      +'<td class="mono">'+fmtDate(r.effective)+'</td>'
+      +'<td class="mono">'+(r.expired==='Indefinite'?'<span style="color:var(--purple)">Indefinite</span>':fmtDate(r.expired))+'</td>'
+      +'<td>'+actionChip(r.action)+'</td>'
+      +'<td>'+tcsChip(r.tcs)+'</td>'
+    +'</tr>';
+  });
+}
+
+// MODULE & TAB SWITCHERS
+function switchModule(mod) {
+  CURRENT_MODULE = mod;
+  document.getElementById('btn-mod-bd').classList.toggle('active', mod==='BD');
+  document.getElementById('btn-mod-rec').classList.toggle('active', mod==='REC');
+  document.getElementById('bd-tabs-bar').style.display = mod==='BD' ? 'flex' : 'none';
+  document.getElementById('rec-tabs-bar').style.display = mod==='REC' ? 'flex' : 'none';
+  document.getElementById('module-bd-wrap').style.display = mod==='BD' ? 'block' : 'none';
+  document.getElementById('module-rec-wrap').style.display = mod==='REC' ? 'block' : 'none';
+  if(mod==='BD') refreshAll(); else refreshREC();
+}
+
+function switchTab(i) {
+  document.querySelectorAll('#bd-tabs-bar .tab').forEach(function(t,idx){t.classList.toggle('active',idx===i);});
+  document.querySelectorAll('#module-bd-wrap .tab-content').forEach(function(c,idx){c.classList.toggle('active',idx===i);});
+}
+
+function switchRECTab(i) {
+  REC_CURRENT_TAB = i;
+  document.querySelectorAll('#rec-tabs-bar .tab').forEach(function(t,idx){t.classList.toggle('active',idx===i);});
+  document.querySelectorAll('#module-rec-wrap .rec-tab-content').forEach(function(c,idx){c.classList.toggle('active',idx===i);});
+}
+
+function toast(msg,type) {
+  var el=document.getElementById('toast');
+  el.textContent=msg; el.className='toast show '+(type||'');
+  clearTimeout(el._t);
+  el._t=setTimeout(function(){el.classList.remove('show');},3000);
+}
+</script>
+</body>
+</html>
